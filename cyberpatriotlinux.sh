@@ -1,10 +1,8 @@
 #!/bin/bash
 
-# Function to check if a package is installed
 package_installed() {
   local package="$1"
-  if [ -n "$(command -v "$package")" ]; then
-    echo "Package '$package' is already installed."
+  if command -v "$package" &>/dev/null; then
     return 0
   else
     return 1
@@ -25,7 +23,7 @@ install_package() {
       sudo yum install -y "$package_name"
       ;;
     *)
-      echo "Unsupported package manager. Please install 'dialog' manually."
+      echo "Unsupported package manager. Please install '$package_name' manually."
       exit 1
       ;;
   esac
@@ -49,9 +47,10 @@ if ! package_installed "$package_name"; then
   install_package "$package_manager" "$package_name"
 fi
 
-if [[ $? -ne 0 ]]; then
+if [[ "$EUID" -ne 0 ]]; then
   echo "This script is running without root privileges, which is not possible. Exiting"
   exit 0
+fi
 
 dialog --msgbox "This is not a comprehensive utility; many operations will still have to be done manually!" 0 0
 
