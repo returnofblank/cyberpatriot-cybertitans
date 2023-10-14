@@ -1,17 +1,52 @@
 #!/bin/bash
 
-REQUIRED_PKG="dialog"
-PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $REQUIRED_PKG | grep "install ok installed")
+# Function to check if a package is installed
+package_installed() {
+  local package="$1"
+  if [ -n "$(command -v "$package")" ]; then
+    echo "Package '$package' is already installed."
+    return 0
+  else
+    return 1
+  fi
+}
 
-echo Checking for $REQUIRED_PKG: $PKG_OK
-if [ "" = "$PKG_OK" ]; then
-  echo "No $REQUIRED_PKG installed. This is required to use the TUI included with this script. You will be asked to input your password to install $REQUIRED_PKG. Also, this will give the script the required privileges for certain processes."
-  sudo apt -y install $REQUIRED_PKG
+# Function to install a package using the detected package manager
+install_package() {
+  local package_manager="$1"
+  local package_name="$2"
+
+  case "$package_manager" in
+    apt)
+      sudo apt-get update
+      sudo apt-get install -y "$package_name"
+      ;;
+    yum)
+      sudo yum install -y "$package_name"
+      ;;
+    *)
+      echo "Unsupported package manager. Please install 'dialog' manually."
+      exit 1
+      ;;
+  esac
+}
+
+# Detect the package manager
+if package_installed "apt"; then
+  package_manager="apt"
+elif package_installed "yum"; then
+  package_manager="yum"
+else
+  echo "Unsupported package manager. Please install 'dialog' manually."
+  exit 1
 fi
 
-if [[ $? -ne 0 ]]; then
-  echo "This script is running without root privileges, which is not possible. Exiting"
-  exit 0
+package_name="dialog"
+
+# Check if 'dialog' is installed, and if not, install it
+if ! package_installed "$package_name"; then
+  echo "Package '$package_name' is not installed. Attempting to install..."
+  install_package "$package_manager" "$package_name"
 fi
 
 dialog --msgbox "This is not a comprehensive utility; many operations will still have to be done manually!" 0 0
