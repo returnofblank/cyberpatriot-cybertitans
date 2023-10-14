@@ -49,6 +49,10 @@ if ! package_installed "$package_name"; then
   install_package "$package_manager" "$package_name"
 fi
 
+if [[ $? -ne 0 ]]; then
+  echo "This script is running without root privileges, which is not possible. Exiting"
+  exit 0
+
 dialog --msgbox "This is not a comprehensive utility; many operations will still have to be done manually!" 0 0
 
 while true; do
