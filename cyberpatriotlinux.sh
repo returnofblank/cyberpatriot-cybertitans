@@ -209,9 +209,9 @@ while true; do
   firewall_management_menu (){
     firewallm=$(dialog --checklist "Select what firewall management you want done: " 0 0 0 --output-fd 1 \
       1 "Install UFW and enable" off \
-      2 "" off \
-      3 "" off \
-      4 "" off)
+      2 "unfilled" off \
+      3 "unfilled" off \
+      4 "unfilled" off)
     # Run commands based on output of dialog
     for option in $firewallm; do
       if [ "$option" == 1 ]; then
@@ -220,18 +220,18 @@ while true; do
         sudo ufw enable
         dialog --title "Installed and enabled UFW" --msgbox "Installed and enabled UFW!" 0 0
       fi
-      if [ "$option" == 2 ]; then
+      #if [ "$option" == 2 ]; then
 
-      fi
-      if [ "$option" == 3 ]; then
+      #fi
+      #if [ "$option" == 3 ]; then
 
-      fi 
-      if [ "$option" == 4 ]; then
+      #fi 
+      #if [ "$option" == 4 ]; then
 
-      fi
+      #fi
     done
   }
-
+  
   mainmenu=$(dialog --menu "Choose a category: " 0 0 0 --output-fd 1 \
     1 "User Management" \
     2 "Package Management & Updates" \
