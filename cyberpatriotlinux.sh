@@ -253,6 +253,7 @@ while true; do
         dialog  --infobox "Enabling automatic updates..." 0 0
         dpkg-reconfigure -plow unattended-upgrades
         sed -i 's/APT::Periodic::Update-Package-Lists "0";/APT::Periodic::Update-Package-Lists "1";/' /etc/apt/apt.conf.d/20auto-upgrades
+        systemctl enable --now dnf-automatic.timer &>/dev/null
         dialog --title "Enabled automatic updates" --msgbox "Enabled automatic updates!" 0 0
       fi 
       if [ "$option" == 4 ]; then
