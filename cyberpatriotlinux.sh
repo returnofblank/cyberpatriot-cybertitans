@@ -150,8 +150,14 @@ while true; do
 
         sorted_user_array=($(printf '%s\n' "${user_array[@]}" | sort))
 
+        # Iterate through sorted_user_array and append "off" to each element       
+        modified_array=()
+        for element in "${sorted_user_array[@]}"; do
+          modified_array+=("$element off")
+        done
+
         # Use dialog to prompt the user for a list of usernames TO DELETE!!!
-        usernames=$(dialog --checklist "Select usernames who should be DELETED (Refer to readme to compare):" 0 0 0 "${sorted_user_array[@]}" --output-fd 1)
+        usernames=$(dialog --checklist "Select usernames who should be DELETED (Refer to readme to compare):" 0 0 0 "${modified_array[@]}" --output-fd 1)
         user_list=""
         for user in $usernames; do
           deluser "$user"
