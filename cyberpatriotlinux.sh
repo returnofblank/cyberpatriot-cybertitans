@@ -53,63 +53,6 @@ if [[ "$EUID" -ne 0 ]]; then
   exit 0
 fi
 
-
-
-#Package manager agnostic variables
-if [ -f /etc/lsb-release ]; then
-    # Ubuntu and Debian-based distributions
-    package_manager="apt"
-elif [ -f /etc/fedora-release ]; then
-    # Fedora
-    package_manager="dnf"
-elif [ -f /etc/redhat-release ]; then
-    # Red Hat Enterprise Linux and CentOS
-    package_manager="dnf"
-elif [ -f /etc/SuSE-release ]; then
-    # openSUSE
-    package_manager="zypper"
-else
-    echo "Unsupported Linux distribution"
-    exit 1
-fi
-
-# List of packages to install and remove
-packages_to_install="$1"
-packages_to_remove="$2"
-
-# Function to install packages
-install_packages() {
-    case $package_manager in
-        "apt")
-            sudo apt -y update &>/dev/null
-            sudo apt -y install $packages_to_install &>/dev/null
-            ;;
-        "dnf")
-            sudo dnf -y install $packages_to_install &>/dev/null
-            ;;
-        "zypper")
-            sudo zypper install -y $packages_to_install &>/dev/null
-            ;;
-    esac
-}
-
-# Function to remove packages
-remove_packages() {
-    case $package_manager in
-        "apt")
-            sudo apt -y remove $packages_to_remove &>/dev/null
-            ;;
-        "dnf")
-            sudo dnf -y remove $packages_to_remove &>/dev/null
-            ;;
-        "zypper")
-            sudo zypper remove -y $packages_to_remove &>/dev/null
-            ;;
-    esac
-}
-
-
-
 dialog --msgbox "This is not a comprehensive utility; many operations will still have to be done manually!" 0 0
 
 while true; do
@@ -254,6 +197,8 @@ while true; do
         dpkg-reconfigure -plow unattended-upgrades 2>/dev/null
         sed -i 's/APT::Periodic::Update-Package-Lists "0";/APT::Periodic::Update-Package-Lists "1";/' /etc/apt/apt.conf.d/20auto-upgrades
         systemctl enable --now dnf-automatic.timer &>/dev/null
+        zypper install yast2-online-update-configuration &>/dev/null
+        yast2 online_update_configuration 2>/dev/null
         dialog --title "Enabled automatic updates" --msgbox "Enabled automatic updates!" 0 0
       fi 
       if [ "$option" == 4 ]; then
