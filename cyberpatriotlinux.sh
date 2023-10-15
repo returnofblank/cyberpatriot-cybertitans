@@ -227,6 +227,8 @@ while true; do
       if [ "$option" == 1 ]; then
         dialog  --infobox "Installing and enabling UFW..." 0 0
         apt -y install ufw &>/dev/null
+        dnf install ufw -y &>/dev/null
+        zypper in $i -y &>/dev/null
         ufw enable
         dialog --title "Installed and enabled UFW" --msgbox "Installed and enabled UFW!" 0 0
       fi
