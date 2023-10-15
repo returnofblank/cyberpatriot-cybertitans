@@ -141,8 +141,8 @@ while true; do
           done
 
           sudodelorno=$(dialog --title Remove sudo privileges from the following users? --yesno "Are you sure you want to remove the following user's admin privileges?" 0 0 --output-fd 1)
-          if [ $sudodelorno == 0 ]; then
-            dialog --msgbox "No users removed from sudo group. User selected no. Continuing." 0 0
+          if [ "$sudodelorno" == "0" ]; then
+            dialog --msgbox "No users removed from sudo group. User selected no." 0 0
             continue
           else
           # Remove users from the sudo group
@@ -182,7 +182,7 @@ while true; do
         usernames=$(dialog --checklist "Select usernames who should be DELETED (Refer to readme to compare):" 0 0 0 "${final_user_array[@]}" --output-fd 1)
         user_list=""
         for user in $usernames; do
-          deluser "$user"
+          deluser "$user" &>/dev/null
           user_list="$user_list$user\n"
         done
         dialog --title "Deleted users" --msgbox "$user_list" 0 0
@@ -228,9 +228,9 @@ while true; do
       if [ "$option" == 4 ]; then
         dialog  --infobox "Removing games and hacking tools..." 0 0
         for i in supertux supertuxkart wesnoth-1.14 0ad extremetuxracer xmoto ettercap-graphical flightgear freeciv-client-gtk freeciv-client-sdl openra neverball nsnake gnome-chess gnome-mines gnome-sudoku aisleriot kpat solitaire armagetronad gl-117 hedgewars xblast-tnt chromium-bsu assaultcube trigger-rally pingus njam supertux2 frozen-bubble xboard lincity lincity-ng pioneers scummvm scummvm-tools openmw redeclipse vavoom teeworlds teeworlds-data teeworlds-server freedoom freedoom-freedm freedoom-phase1 freedoom-phase2 freedoom-timidity openarena openarena-server openarena-data openarena-0811 openarena-088 openarena-085-data openarena-085 openarena-0811-maps openttd openttd-data 0ad-data hedgewars-data hedgewars-server hedgewars-dbg berusky berusky2 berusky-data solarwolf nethack-console crawl crawl-tiles crawl-common crawl-data crawl-sdl crawl-console crawl-tiles-data crawl-tiles-sdl crawl-tiles-dbg crawl-dbg wop pingus-data edgar-data pingus-data minecraft-installer jo freedroidrpg boswars ejabberd-contrib phalanx supertuxkart stendhal supertux wireshark* ophcrack aircrack-ng john nmap metasploit-framework burp hydra sqlmap nikto maltego beef-xss cain thc-hydra ettercap-graphical netcat john-data fern-wifi-cracker dsniff hping3; do
-          apt -y remove $i &>/dev/null
-          dnf remove $i -y &>/dev/null
-          zypper rm $i -y &>/dev/null
+          apt -y remove $i 2>/dev/null
+          dnf remove $i -y 2>/dev/null
+          zypper rm $i -y 2>/dev/null
         done
         dialog --title "Removed games and hacking tools" --msgbox "Removed games and hacking tools!" 0 0
       fi
