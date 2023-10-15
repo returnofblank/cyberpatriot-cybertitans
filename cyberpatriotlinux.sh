@@ -123,19 +123,19 @@ while true; do
 
           # Add new users to the sudo group
           for user in "${users_to_add[@]}"; do
-            usermod -aG sudo "$user"
+            usermod -aG sudo "$user" &>/dev/null
           done
 
           # Remove users from the sudo group
           for user in "${users_to_remove[@]}"; do
-            deluser "$user" sudo
+            deluser "$user" sudo &>/dev/null
           done
 
           # Display the changes made using dialog
           add_msg="Users added to sudo group: ${users_to_add[*]}"
           remove_msg="Users removed from sudo group: ${users_to_remove[*]}"
 
-          dialog --infobox "$add_msg\n$remove_msg" 0 0
+          dialog --msgbox "$add_msg\n$remove_msg" 0 0
         fi
       fi
       if [ "$option" == 3 ]; then
