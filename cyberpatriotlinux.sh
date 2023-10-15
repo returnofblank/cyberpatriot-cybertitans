@@ -141,7 +141,7 @@ while true; do
           done
 
           sudodelorno=$(dialog --title Remove sudo privileges from the following users? --yesno "Are you sure you want to remove the following user's admin privileges?" 0 0 --output-fd 1)
-          if [ sudodelorno == 0 ]; then
+          if [ $sudodelorno == 0 ]; then
             dialog --msgbox "No users removed from sudo group. User selected no. Continuing." 0 0
             continue
           else
