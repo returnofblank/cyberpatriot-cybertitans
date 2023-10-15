@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#Installs dialog on any system
 package_installed() {
   local package="$1"
   if command -v "$package" &>/dev/null; then
@@ -51,6 +52,63 @@ if [[ "$EUID" -ne 0 ]]; then
   echo "This script is running without root privileges, which is not possible. Exiting"
   exit 0
 fi
+
+
+
+#Package manager agnostic variables
+if [ -f /etc/lsb-release ]; then
+    # Ubuntu and Debian-based distributions
+    package_manager="apt"
+elif [ -f /etc/fedora-release ]; then
+    # Fedora
+    package_manager="dnf"
+elif [ -f /etc/redhat-release ]; then
+    # Red Hat Enterprise Linux and CentOS
+    package_manager="dnf"
+elif [ -f /etc/SuSE-release ]; then
+    # openSUSE
+    package_manager="zypper"
+else
+    echo "Unsupported Linux distribution"
+    exit 1
+fi
+
+# List of packages to install and remove
+packages_to_install="$1"
+packages_to_remove="$2"
+
+# Function to install packages
+install_packages() {
+    case $package_manager in
+        "apt")
+            sudo apt -y update &>/dev/null
+            sudo apt -y install $packages_to_install &>/dev/null
+            ;;
+        "dnf")
+            sudo dnf -y install $packages_to_install &>/dev/null
+            ;;
+        "zypper")
+            sudo zypper install -y $packages_to_install &>/dev/null
+            ;;
+    esac
+}
+
+# Function to remove packages
+remove_packages() {
+    case $package_manager in
+        "apt")
+            sudo apt remove $packages_to_remove
+            ;;
+        "dnf")
+            sudo dnf remove $packages_to_remove
+            ;;
+        "zypper")
+            sudo zypper remove $packages_to_remove
+            ;;
+    esac
+}
+
+
 
 dialog --msgbox "This is not a comprehensive utility; many operations will still have to be done manually!" 0 0
 
