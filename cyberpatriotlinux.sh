@@ -246,17 +246,18 @@ while true; do
         # Add "off" after each output
         final_output_array=()
         for output in "${services[@]}"; do
-            final_user_array+=($user "" off)
+            final_output_array+=($output "" off)
         done
             
         # Use dialog to prompt the user for a list of services to stop
         servicenames=$(dialog --checklist "Select services should be stop:" 0 0 0 "${final_output_array[@]}" --output-fd 1)
         service_list=""
         for service in $servicenames; do
-          systemctl disable $service
+          systemctl disable $service &>/dev/null
+          systemctl stop $service &>/dev/null
           service_list="$service_list$service\n"
         done
-        dialog --title "Disabled services" --msgbox "service_list" 0 0
+        dialog --title "Disabled services" --msgbox "$service_list" 0 0
       fi
       #if [ "$option" == 2 ]; then
 
