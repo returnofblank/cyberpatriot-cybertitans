@@ -203,24 +203,24 @@ while true; do
     for option in $packagem; do
       if [ "$option" == 1 ]; then
         dialog  --infobox "Updating system repositories" 0 0
-        apt update &>/dev/null
-        dnf upgrade --refresh &>/dev/null
-        zypper ref &>/dev/null
+        apt update 2>/dev/null
+        dnf upgrade --refresh 2>/dev/null
+        zypper ref 2>/dev/null
         dialog --title "Updated system repositories" --msgbox "Updated system repositories!" 0 0
       fi
       if [ "$option" == 2 ]; then
         dialog  --infobox "Upgrading packages..." 0 0
-        apt -y upgrade &>/dev/null
-        dnf upgrade -y &>/dev/null
-        zypper up -y &>/dev/null
+        apt -y upgrade 2>/dev/null
+        dnf upgrade -y 2>/dev/null
+        zypper up -y 2>/dev/null
         dialog --title "Upgraded system packages" --msgbox "Upgraded system packages!" 0 0
       fi
       if [ "$option" == 3 ]; then
         dialog  --infobox "Enabling automatic updates..." 0 0
         dpkg-reconfigure -plow unattended-upgrades 2>/dev/null
         sed -i 's/APT::Periodic::Update-Package-Lists "0";/APT::Periodic::Update-Package-Lists "1";/' /etc/apt/apt.conf.d/20auto-upgrades
-        systemctl enable --now dnf-automatic.timer &>/dev/null
-        zypper install yast2-online-update-configuration &>/dev/null
+        systemctl enable --now dnf-automatic.timer 2>/dev/null
+        zypper install yast2-online-update-configuration 2>/dev/null
         yast2 online_update_configuration 2>/dev/null
         dialog --title "Enabled automatic updates" --msgbox "Enabled automatic updates!" 0 0
       fi 
@@ -245,9 +245,9 @@ while true; do
     for option in $firewallm; do
       if [ "$option" == 1 ]; then
         dialog  --infobox "Installing and enabling UFW..." 0 0
-        apt -y install ufw &>/dev/null
-        dnf install ufw -y &>/dev/null
-        zypper in $i -y &>/dev/null
+        apt -y install ufw 2>/dev/null
+        dnf install ufw -y 2>/dev/null
+        zypper in $i -y 2>/dev/null
         ufw enable
         dialog --title "Installed and enabled UFW" --msgbox "Installed and enabled UFW!" 0 0
       fi
