@@ -56,6 +56,19 @@ fi
 dialog --msgbox "This is not a comprehensive utility; many operations will still have to be done manually!" 0 0
 
 while true; do
+  #Enable distro agnostic identification of administrators
+  if [[ -f /etc/os-release ]]; then
+      source /etc/os-release
+    if [[ $ID == "debian" || $ID_LIKE == "debian" ]]; then
+      group_name="sudo"
+    else
+      group_name="wheel"
+    fi
+  else
+    # Fallback to "wheel" if /etc/os-release is not available
+    group_name="wheel"
+  fi
+      
   # Functions for display management options
   user_management_menu() {
     userm=$(dialog --checklist "Select what user management you want done: " 0 0 0 --output-fd 1 \
@@ -66,7 +79,7 @@ while true; do
     # Run commands based on output of dialog
     for option in $userm; do
       if [ "$option" == 1 ]; then
-        sudo_users=$(getent group sudo | cut -d : -f 4)
+        sudo_users=$(getent group $group_name | cut -d : -f 4)
         IFS=',' read -ra sudo_user_array <<< "$sudo_users"
 
         # Concatenate all of the username and password pairs into a single string
@@ -96,7 +109,7 @@ while true; do
         if [[ -z "${usernames// }" ]]; then
           dialog --msgbox "No changes were made. Usernames were not provided." 0 0
         else
-          current_sudo_users=($(getent group sudo | cut -d ':' -f 4 | tr ',' ' '))
+          current_sudo_users=($(getent group $group_name | cut -d ':' -f 4 | tr ',' ' '))
 
           # Convert the input to an array
           IFS=',' read -ra user_array <<< "$usernames"
@@ -124,12 +137,12 @@ while true; do
 
           # Add new users to the sudo group
           for user in "${users_to_add[@]}"; do
-            usermod -aG sudo "$user" &>/dev/null
+            usermod -aG "$group_name" "$user" &>/dev/null
           done
 
           # Remove users from the sudo group
           for user in "${users_to_remove[@]}"; do
-            deluser "$user" sudo &>/dev/null
+            deluser "$user" "$group_name" &>/dev/null
           done
 
           # Display the changes made using dialog
