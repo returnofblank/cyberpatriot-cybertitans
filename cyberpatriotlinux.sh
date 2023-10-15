@@ -234,7 +234,7 @@ while true; do
   service_management_menu (){
     servicem=$(dialog --checklist "Select what service management you want done: " 0 0 0 --output-fd 1 \
       1 "List and disable services" off \
-      2 "unfilled" off \
+      2 "Don't permit root login for SSH Daemon" off \
       3 "unfilled" off \
       4 "unfilled" off)
     # Run commands based on output of dialog
@@ -261,9 +261,12 @@ while true; do
         done
         dialog --title "Disabled services" --msgbox "$service_list" 0 0
       fi
-      #if [ "$option" == 2 ]; then
-
-      #fi
+      if [ "$option" == 2 ]; then
+        dialog  --infobox "Rewriting /etc/ssh/sshd_config..." 0 0
+        sudo sed -i 's/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config
+        systemctl restart sshd.service
+        dialog --title "Root login no longer permitted for SSH Daemon" --msgbox "Root login no longer permitted for SSH Daemon!" 0 0
+      fi
       #if [ "$option" == 3 ]; then
 
       #fi 
