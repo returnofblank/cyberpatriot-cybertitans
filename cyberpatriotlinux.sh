@@ -200,7 +200,7 @@ while true; do
       if [ "$option" == 4 ]; then
         dialog  --infobox "Removing games and hacking tools..." 0 0
         for i in supertux supertuxkart wesnoth-1.14 0ad extremetuxracer xmoto flightgear freeciv-client-gtk freeciv-client-sdl openra neverball nsnake gnome-chess gnome-mines gnome-sudoku aisleriot kpat solitaire armagetronad gl-117 hedgewars xblast-tnt chromium-bsu assaultcube trigger-rally pingus njam supertux2 frozen-bubble xboard lincity lincity-ng pioneers scummvm scummvm-tools openmw redeclipse vavoom teeworlds teeworlds-data teeworlds-server freedoom freedoom-freedm freedoom-phase1 freedoom-phase2 freedoom-timidity openarena openarena-server openarena-data openarena-0811 openarena-088 openarena-085-data openarena-085 openarena-0811-maps openttd openttd-data 0ad-data hedgewars-data hedgewars-server hedgewars-dbg berusky berusky2 berusky-data solarwolf nethack-console crawl crawl-tiles crawl-common crawl-data crawl-sdl crawl-console crawl-tiles-data crawl-tiles-sdl crawl-tiles-dbg crawl-dbg wop pingus-data edgar-data pingus-data minecraft-installer jo freedroidrpg boswars ejabberd-contrib phalanx supertuxkart stendhal supertux wireshark* ophcrack aircrack-ng john nmap metasploit-framework burp hydra sqlmap nikto maltego beef-xss cain thc-hydra ettercap-graphical netcat john-data fern-wifi-cracker dsniff hping3; do
-          sudo apt -y remove $i &>/dev/null
+          apt -y remove $i &>/dev/null
         done
         dialog --title "Removed games and hacking tools" --msgbox "Removed games and hacking tools!" 0 0
       fi
@@ -217,7 +217,7 @@ while true; do
       if [ "$option" == 1 ]; then
         dialog  --infobox "Installing and enabling UFW..." 0 0
         apt -y install ufw &>/dev/null
-        sudo ufw enable
+        ufw enable
         dialog --title "Installed and enabled UFW" --msgbox "Installed and enabled UFW!" 0 0
       fi
       #if [ "$option" == 2 ]; then
@@ -263,7 +263,7 @@ while true; do
       fi
       if [ "$option" == 2 ]; then
         dialog  --infobox "Rewriting /etc/ssh/sshd_config..." 0 0
-        sudo sed -i 's/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config
+        sed -i 's/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config
         systemctl restart sshd.service
         dialog --title "Root login no longer permitted for SSH Daemon" --msgbox "Root login no longer permitted for SSH Daemon!" 0 0
       fi
