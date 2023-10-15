@@ -97,13 +97,13 @@ install_packages() {
 remove_packages() {
     case $package_manager in
         "apt")
-            sudo apt remove $packages_to_remove
+            sudo apt -y remove $packages_to_remove &>/dev/null
             ;;
         "dnf")
-            sudo dnf remove $packages_to_remove
+            sudo dnf -y remove $packages_to_remove &>/dev/null
             ;;
         "zypper")
-            sudo zypper remove $packages_to_remove
+            sudo zypper remove -y $packages_to_remove &>/dev/null
             ;;
     esac
 }
