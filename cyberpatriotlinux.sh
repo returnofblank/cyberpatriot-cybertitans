@@ -277,7 +277,7 @@ while true; do
         done
             
         # Use dialog to prompt the user for a list of services to stop
-        servicenames=$(dialog --checklist "Select services should be stop:" 0 0 0 "${final_output_array[@]}" --output-fd 1)
+        servicenames=$(dialog --checklist "Select which services should be disabled:" 0 0 0 "${final_output_array[@]}" --output-fd 1)
         service_list=""
         for service in $servicenames; do
           systemctl disable $service &>/dev/null
