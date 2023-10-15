@@ -231,7 +231,45 @@ while true; do
       #fi
     done
   }
-  
+  service_management_menu (){
+    servicem=$(dialog --checklist "Select what service management you want done: " 0 0 0 --output-fd 1 \
+      1 "List and disable services" off \
+      2 "unfilled" off \
+      3 "unfilled" off \
+      4 "unfilled" off)
+    # Run commands based on output of dialog
+    for option in $servicem; do
+      if [ "$option" == 1 ]; then
+        # Get a list of all running services
+        services=($(systemctl list-units --type=service --state=active --no-pager --plain | awk '{print $1}'))
+
+        # Add "off" after each output
+        final_output_array=()
+        for output in "${services[@]}"; do
+            final_user_array+=($user "" off)
+        done
+            
+        # Use dialog to prompt the user for a list of services to stop
+        servicenames=$(dialog --checklist "Select services should be stop:" 0 0 0 "${final_output_array[@]}" --output-fd 1)
+        service_list=""
+        for service in $servicenames; do
+          systemctl disable $service
+          service_list="$service_list$service\n"
+        done
+        dialog --title "Disabled services" --msgbox "service_list" 0 0
+      fi
+      #if [ "$option" == 2 ]; then
+
+      #fi
+      #if [ "$option" == 3 ]; then
+
+      #fi 
+      #if [ "$option" == 4 ]; then
+
+      #fi
+    done
+  }
+
   mainmenu=$(dialog --menu "Choose a category: " 0 0 0 --output-fd 1 \
     1 "User Management" \
     2 "Package Management & Updates" \
@@ -246,6 +284,7 @@ while true; do
     1) user_management_menu ;;
     2) package_management_menu ;;
     3) firewall_management_menu ;;
+    4) service_management_menu ;;
     5) clear && exit 0 ;;
   esac
 done
