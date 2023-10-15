@@ -243,9 +243,11 @@ while true; do
         # Get a list of all running services
         services=($(systemctl list-units --type=service --state=active --no-pager --plain | awk '{print $1}'))
 
+        excluded=("${services[@]:1:$((${#services[@]} - 5))}")
+
         # Add "off" after each output
         final_output_array=()
-        for output in "${services[@]}"; do
+        for output in "${excluded[@]}"; do
             final_output_array+=($output "" off)
         done
             
