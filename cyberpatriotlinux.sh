@@ -145,19 +145,21 @@ while true; do
         # Convert the user list into an array
         user_array=()
         for user in $users; do
-            user_array+=($user "" off)
+            user_array+=($user)
         done
 
-        sorted_user_array=($(printf '%s\n' "${user_array[@]}" | sort))
+        # Sort the user array
+        IFS=$'\n' sorted_user_array=($(sort <<<"${user_array[*]}"))
+        unset IFS
 
-        # Iterate through sorted_user_array and append "off" to each element       
-        modified_array=()
-        for element in "${sorted_user_array[@]}"; do
-          modified_array+=("$element off")
+        # Add "off" after each username
+        final_user_array=()
+        for user in "${sorted_user_array[@]}"; do
+            final_user_array+=($user "" off)
         done
 
         # Use dialog to prompt the user for a list of usernames TO DELETE!!!
-        usernames=$(dialog --checklist "Select usernames who should be DELETED (Refer to readme to compare):" 0 0 0 "${modified_array[@]}" --output-fd 1)
+        usernames=$(dialog --checklist "Select usernames who should be DELETED (Refer to readme to compare):" 0 0 0 "${final_user_array[@]}" --output-fd 1)
         user_list=""
         for user in $usernames; do
           deluser "$user"
