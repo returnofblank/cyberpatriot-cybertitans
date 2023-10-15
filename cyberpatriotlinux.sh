@@ -148,8 +148,10 @@ while true; do
             user_array+=($user "" off)
         done
 
+        sorted_user_array=($(printf '%s\n' "${user_array[@]}" | sort))
+
         # Use dialog to prompt the user for a list of usernames TO DELETE!!!
-        usernames=$(dialog --checklist "Select usernames who should be DELETED (Refer to readme to compare):" 0 0 0 "${user_array[@]}" --output-fd 1)
+        usernames=$(dialog --checklist "Select usernames who should be DELETED (Refer to readme to compare):" 0 0 0 "${sorted_user_array[@]}" --output-fd 1)
         user_list=""
         for user in $usernames; do
           deluser "$user"
@@ -196,6 +198,31 @@ while true; do
       fi
     done
   }
+  firewall_management_menu (){
+    firewallm=$(dialog --checklist "Select what firewall management you want done: " 0 0 0 --output-fd 1 \
+      1 "Install UFW and enable" off \
+      2 "" off \
+      3 "" off \
+      4 "" off)
+    # Run commands based on output of dialog
+    for option in $firewallm; do
+      if [ "$option" == 1 ]; then
+        dialog  --infobox "Installing and enabling UFW..." 0 0
+        apt -y install ufw &>/dev/null
+        sudo ufw enable
+        dialog --title "Installed and enabled UFW" --msgbox "Installed and enabled UFW!" 0 0
+      fi
+      if [ "$option" == 2 ]; then
+
+      fi
+      if [ "$option" == 3 ]; then
+
+      fi 
+      if [ "$option" == 4 ]; then
+
+      fi
+    done
+  }
 
   mainmenu=$(dialog --menu "Choose a category: " 0 0 0 --output-fd 1 \
     1 "User Management" \
@@ -210,6 +237,7 @@ while true; do
   case $mainmenu in
     1) user_management_menu ;;
     2) package_management_menu ;;
+    3) firewall_management_menu ;;
     5) clear && exit 0 ;;
   esac
 done
