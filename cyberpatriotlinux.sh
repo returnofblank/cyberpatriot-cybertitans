@@ -148,14 +148,12 @@ while true; do
           # Remove users from the sudo group
             for user in "${users_to_remove[@]}"; do
               deluser "$user" "$group_name" &>/dev/null
+              # Display the changes made using dialog
+              add_msg="Users added to sudo group: ${users_to_add[*]}"
+              remove_msg="Users removed from sudo group: ${users_to_remove[*]}"
+              dialog --msgbox "$add_msg\n$remove_msg" 0 0
             done
           fi
-
-          # Display the changes made using dialog
-          add_msg="Users added to sudo group: ${users_to_add[*]}"
-          remove_msg="Users removed from sudo group: ${users_to_remove[*]}"
-
-          dialog --msgbox "$add_msg\n$remove_msg" 0 0
         fi
       fi
       if [ "$option" == 3 ]; then
