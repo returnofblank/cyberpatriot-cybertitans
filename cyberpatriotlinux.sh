@@ -75,7 +75,8 @@ while true; do
       1 "Replace passwords of administrators" off \
       2 "Remove unauthorized users from sudo and add users supposed to be in sudo" off \
       3 "Remove unauthorized users" off \
-      4 "Disable root login" off)
+      4 "Disable root login" off \
+      5 "Enable password policy practices and disable guest account if present" off)
     # Run commands based on output of dialog
     for option in $userm; do
       if [ "$option" == 1 ]; then
@@ -183,6 +184,16 @@ while true; do
         sed -i "/^root:/s:/bin/bash:/sbin/nologin:g" /etc/passwd
         dialog --title "Root Disabled" --msgbox "Login no longer enabled for Root user" 0 0
       fi
+      if [ "$option" == 5 ]; then
+        apt -y install libpam-cracklib
+        sed -i '/pam_cracklib.so/ s/$/ ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1/' /etc/pam.d/common-password
+        sed -i '/pam_unix.so/ s/$/ remember=5 minlen=5/' /etc/pam.d/common-password
+        sed -i 's/PASS_MAX_DAYS.*/PASS_MAX_DAYS 90/' /etc/login.defs
+        sed -i 's/PASS_MIN_DAYS.*/PASS_MIN_DAYS 10/' /etc/login.defs
+        sed -i 's/PASS_WARN_AGE.*/PASS_WARN_AGE 7/' /etc/login.defs
+        echo "auth required pam_tally2.so deny=5 onerr=fail unlock_time=1800" | sudo tee -a /etc/pam.d/common-auth
+        echo "allow-guest=false" >> /etc/lightdm/lightdm.conf
+        dialog --title "Password Policy enabled" --msgbox "Secure passwords only allowed, guest accounts removed" 0 0
     done
   }
   package_management_menu (){
