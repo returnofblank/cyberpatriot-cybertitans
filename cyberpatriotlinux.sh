@@ -272,7 +272,7 @@ while true; do
       fi 
       if [ "$option" == 4 ]; then
         dialog --title "Process manager" --msgbox "This will launch htop, a utility for managing processes, once you are finished, you can press CTRL + C to exit." 0 0
-        sudo apt install htop >/dev/null
+        apt install htop >/dev/null
         htop
       fi
     done
