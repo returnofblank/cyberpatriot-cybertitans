@@ -103,9 +103,7 @@ while true; do
       fi
       if [ "$option" == 2 ]; then
         # Use dialog to prompt the user for a list of usernames
-        usernames=$(dialog --inputbox "Enter a list of usernames (comma-separated) who should be in the sudo group:" 0 0 --output-fd 1)
-        # Removes white spaces
-        usernames=$(echo "$usernames" | xargs)
+        usernames=$(dialog --inputbox "Enter a list of usernames (comma-separated, no spaces) who should be in the sudo group:" 0 0 --output-fd 1)
         if [[ -z "${usernames// }" ]]; then
           dialog --msgbox "No changes were made. Usernames were not provided." 0 0
         else
