@@ -156,7 +156,7 @@ while true; do
         echo "auth required pam_tally2.so deny=5 onerr=fail unlock_time=1800" | sudo tee -a /etc/pam.d/common-auth
         dialog --title "Password Policy enabled" --msgbox "Secure passwords only allowed now" 0 0
       fi
-      if [ "$option" == 5 ]; then
+      if [ "$option" == 6 ]; then
         echo "allow-guest=false" >> /etc/lightdm/lightdm.conf
       fi
     done
