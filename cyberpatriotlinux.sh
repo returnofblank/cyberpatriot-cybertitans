@@ -150,11 +150,11 @@ while true; do
               deluser "$user" "$group_name" &>/dev/null
             done
           fi
-              # Display the changes made using dialog
-              add_msg="Users added to sudo group: ${users_to_add[*]}"
-              remove_msg="Users removed from sudo group: ${users_to_remove[*]}"
+          # Display the changes made using dialog
+          add_msg="Users added to sudo group: ${users_to_add[*]}"
+          remove_msg="Users removed from sudo group: ${users_to_remove[*]}"
 
-              dialog --msgbox "$add_msg\n$remove_msg" 0 0
+          dialog --msgbox "$add_msg\n$remove_msg" 0 0
         fi
       fi
       if [ "$option" == 3 ]; then
