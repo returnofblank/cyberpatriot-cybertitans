@@ -37,7 +37,8 @@ while true; do
       2 "Remove unauthorized users from sudo and add users supposed to be in sudo" off \
       3 "Remove unauthorized users" off \
       4 "Disable root login" off \
-      5 "Enable password policy practices and disable guest account if present" off)
+      5 "Enable password policy practices" off \
+      6 "Disable guest account, if present" off)
     # Run commands based on output of dialog
     for option in $userm; do
       if [ "$option" == 1 ]; then
@@ -153,8 +154,10 @@ while true; do
         sed -i 's/PASS_MIN_DAYS.*/PASS_MIN_DAYS 10/' /etc/login.defs
         sed -i 's/PASS_WARN_AGE.*/PASS_WARN_AGE 7/' /etc/login.defs
         echo "auth required pam_tally2.so deny=5 onerr=fail unlock_time=1800" | sudo tee -a /etc/pam.d/common-auth
+        dialog --title "Password Policy enabled" --msgbox "Secure passwords only allowed now" 0 0
+      fi
+      if [ "$option" == 5 ]; then
         echo "allow-guest=false" >> /etc/lightdm/lightdm.conf
-        dialog --title "Password Policy enabled" --msgbox "Secure passwords only allowed, guest accounts removed" 0 0
       fi
     done
   }
