@@ -4,7 +4,7 @@ if ! dpkg -l | grep -q "dialog"; then
     # Notify the user and install dialog using apt
     echo "Dialog is not installed. Installing now..."
     sudo apt update
-    sudo apt install dialog
+    sudo apt -y install dialog
     echo "Dialog has been installed."
     sleep 2
 fi
