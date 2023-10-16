@@ -280,7 +280,7 @@ while true; do
   }
   malware_management_menu () {
       malwarem=$(dialog --checklist "Select what malware management you want done: " 0 0 0 --output-fd 1 \
-      1 "Run ClamAV anti-virus" off \
+      1 "Run ClamAV anti-virus - Do this last, it will take a very long time as it scans everything under '/'" off \
       2 "unfilled" off \
       3 "unfilled" off \
       4 "unfilled" off)
