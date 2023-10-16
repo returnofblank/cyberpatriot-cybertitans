@@ -148,7 +148,7 @@ while true; do
         dialog --title "Root Disabled" --msgbox "Login no longer enabled for Root user" 0 0
       fi
       if [ "$option" == 5 ]; then
-        echo "minlen = 14\ucredit = 1\lcredit = 1\ocredit = 1\dcredit = 1" >> /etc/security/pwquality.conf
+        echo -e "minlen = 14\nucredit = 1\nlcredit = 1\nocredit = 1\ndcredit = 1" >> /etc/security/pwquality.conf
         sed -i '/pam_unix.so/ s/$/ remember=5 minlen=5/' /etc/pam.d/common-password
         sed -i 's/PASS_MAX_DAYS.*/PASS_MAX_DAYS 90/' /etc/login.defs
         sed -i 's/PASS_MIN_DAYS.*/PASS_MIN_DAYS 10/' /etc/login.defs
