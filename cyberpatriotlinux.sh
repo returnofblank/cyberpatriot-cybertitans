@@ -264,13 +264,38 @@ while true; do
       #fi
     done
   }
+  malware_management_menu () {
+      malwarem=$(dialog --checklist "Select what malware management you want done: " 0 0 0 --output-fd 1 \
+      1 "Run ClamAV anti-virus" off \
+      2 "unfilled" off \
+      3 "unfilled" off \
+      4 "unfilled" off)
+    # Run commands based on output of dialog
+    for option in $malwarem; do
+      if [ "$option" == 1 ]; then
+        dialog  --infobox "This might take a while - Running malware check on directory '/' ..." 0 0
+        apt -y install clamav clamav-daemon &>/dev/null
+        clamresults=$(clamscan / --recursive)
+        echo "$clamresults" >> ./clamavresults.txt
+        dialog --title "Results of malware scan" --msgbox "Output of malware scan sent to clamavresults.txt, which will be located in the directory this script is ran" 0 0
+      fi
+      #if [ "$option" == 2 ]; then
 
+      #fi
+      #if [ "$option" == 3 ]; then
+
+      #fi 
+      #if [ "$option" == 4 ]; then
+
+      #fi
+  }
   mainmenu=$(dialog --menu "Choose a category: " 0 0 0 --output-fd 1 \
     1 "User Management" \
     2 "Package Management & Updates" \
     3 "Firewall" \
     4 "Service Management" \
-    5 "Finished (Close Prompt)"
+    5 "Malware Checks" \
+    6 "Finished (Close Prompt)"
   )
   if [ $? -ne 0 ]; then
         clear && break
@@ -280,7 +305,8 @@ while true; do
     2) package_management_menu ;;
     3) firewall_management_menu ;;
     4) service_management_menu ;;
-    5) clear && exit 0 ;;
+    5) malware_management_menu ;;
+    6) clear && exit 0 ;;
   esac
 done
 
