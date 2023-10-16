@@ -120,12 +120,20 @@ while true; do
 
           # Iterate through the user array
           for user in "${user_array[@]}"; do
-          # Check if the user is already in the sudo group or if it's the current user
-            if [[ " ${current_sudo_users[*]} " =~ " $user " || "$user" == $(logname) ]]; then
-              continue
-            else
-              users_to_add+=("$user")
-            fi
+    user_exists=false
+
+    for current_user in "${current_sudo_users[@]}"; do
+        if [ "$user" == "$current_user" ]; then
+            user_exists=true
+            break
+        fi
+    done
+
+    if [ "$user_exists" = true ] || [ "$user" == $(logname) ]; then
+        continue
+    else
+        users_to_add+=("$user")
+    fi
           done
 
           # Iterate through the current sudo users to find those to remove
