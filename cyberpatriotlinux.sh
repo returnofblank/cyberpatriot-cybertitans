@@ -98,13 +98,13 @@ while true; do
 
           # Add new users to the sudo group
           for user in "${users_to_add[@]}"; do
-            usermod -aG "$group_name" "$user" &>/dev/null
+            usermod -aG "$group_name" "$user" >/dev/null
           done
 
           # Remove users from the sudo group
           for user in "${users_to_remove[@]}"; do
-            deluser "$user" "$group_name" &>/dev/null
-            deluser "$user" adm &>/dev/null
+            deluser "$user" "$group_name" >/dev/null
+            deluser "$user" adm >/dev/null
           done
 
           # Display the changes made using dialog
@@ -137,7 +137,7 @@ while true; do
         usernames=$(dialog --checklist "Select usernames who should be DELETED (Refer to readme to compare):" 0 0 0 "${final_user_array[@]}" --output-fd 1)
         user_list=""
         for user in $usernames; do
-          deluser "$user" &>/dev/null
+          deluser "$user" >/dev/null
           user_list="$user_list$user\n"
         done
         dialog --title "Deleted users" --msgbox "$user_list" 0 0
@@ -221,10 +221,10 @@ while true; do
   }
   service_management_menu (){
     servicem=$(dialog --checklist "Select what service management you want done: " 0 0 0 --output-fd 1 \
-      1 "List and disable services" off \
+      1 "Disable & stop services" off \
       2 "Don't permit root login for SSH Daemon" off \
-      3 "Manage running processes" off \
-      4 "unfilled" off)
+      3 "Enable & start services" off \
+      4 "Manage running processes" off)
     # Run commands based on output of dialog
     for option in $servicem; do
       if [ "$option" == 1 ]; then
@@ -243,8 +243,8 @@ while true; do
         servicenames=$(dialog --checklist "Select which services should be disabled:" 0 0 0 "${final_output_array[@]}" --output-fd 1)
         service_list=""
         for service in $servicenames; do
-          systemctl disable $service &>/dev/null
-          systemctl stop $service &>/dev/null
+          systemctl disable $service >/dev/null
+          systemctl stop $service >/dev/null
           service_list="$service_list$service\n"
         done
         dialog --title "Disabled services" --msgbox "$service_list" 0 0
@@ -256,12 +256,24 @@ while true; do
         dialog --title "Root login no longer permitted for SSH Daemon" --msgbox "Root login no longer permitted for SSH Daemon!" 0 0
       fi
       if [ "$option" == 3 ]; then
+        services=$(dialog --title "Enable & start services" --inputbox "Enter a list of services (comma-separated, no spaces) you want enabled and started:" 0 0 --output-fd 1)
+        if [[ -z "${services// }" ]]; then
+          dialog --msgbox "No changes were made. Services were not provided." 0 0
+        else
+          IFS=',' read -ra services_array <<< "$services"
+
+          for service in "${services_array[@]}"; do
+            systemctl enable "$service" >/dev/null
+            systemctl start "$service" >/dev/null
+          done
+          add_msg="Services enabled and started: ${services_array[@]}"
+          dialog --msgbox "$add_msg" 0 0
+        fi
+      fi 
+      if [ "$option" == 4 ]; then
         dialog --title "Process manager" --msgbox "This will launch htop, a utility for managing processes, once you are finished, you can press CTRL + C to exit." 0 0
         htop
-      fi 
-      #if [ "$option" == 4 ]; then
-
-      #fi
+      fi
     done
   }
   malware_management_menu () {
@@ -274,7 +286,7 @@ while true; do
     for option in $malwarem; do
       if [ "$option" == 1 ]; then
         dialog  --infobox "This might take a while - Running malware check on directory '/' ..." 0 0
-        apt -y install clamav clamav-daemon &>/dev/null
+        apt -y install clamav clamav-daemon >/dev/null
         clamresults=$(clamscan / --recursive)
         echo "$clamresults" >> ./clamavresults.txt
         dialog --title "Results of malware scan" --msgbox "Output of malware scan sent to clamavresults.txt, which will be located in the directory this script is ran" 0 0
