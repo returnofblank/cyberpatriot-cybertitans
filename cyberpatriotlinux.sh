@@ -149,7 +149,7 @@ while true; do
       fi
       if [ "$option" == 5 ]; then
         echo -e "minlen = 14\nucredit = -1\nlcredit = -1\nocredit = -1\ndcredit = -1" >> /etc/security/pwquality.conf
-        sed -i '/pam_unix.so/ s/$/ remember=5 minlen=5/' /etc/pam.d/common-password
+        sed -i '/pam_unix.so/ s/$/ remember=5 minlen=14/' /etc/pam.d/common-password
         sed -i 's/PASS_MAX_DAYS.*/PASS_MAX_DAYS 90/' /etc/login.defs
         sed -i 's/PASS_MIN_DAYS.*/PASS_MIN_DAYS 10/' /etc/login.defs
         sed -i 's/PASS_WARN_AGE.*/PASS_WARN_AGE 7/' /etc/login.defs
