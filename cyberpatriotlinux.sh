@@ -1,12 +1,13 @@
 #!/bin/bash
 
-if dpkg -l | grep -q "dialog"; then
-    # Notify the user and install dialog using apt
-    echo "Dialog is not installed. Installing now..."
-    sudo apt update
-    sudo apt -y install dialog
-    echo "Dialog has been installed."
-    sleep 2
+# Package name to check
+PACKAGE_NAME="dialog"
+
+# Check if the package is installed
+dpkg --get-selections | grep -q $PACKAGE_NAME > /dev/null
+if [[ $? -ne 0 ]]; then
+  echo "The package $PACKAGE_NAME is not installed."
+  sudo apt -y install $PACKAGE_NAME
 fi
 
 if [[ "$EUID" -ne 0 ]]; then
@@ -147,8 +148,7 @@ while true; do
         dialog --title "Root Disabled" --msgbox "Login no longer enabled for Root user" 0 0
       fi
       if [ "$option" == 5 ]; then
-        apt -y install libpam-cracklib
-        sed -i '/pam_cracklib.so/ s/$/ ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1/' /etc/pam.d/common-password
+        echo "minlen = 14\ucredit = 1\lcredit = 1\ocredit = 1\dcredit = 1" >> /etc/security/pwquality.conf
         sed -i '/pam_unix.so/ s/$/ remember=5 minlen=5/' /etc/pam.d/common-password
         sed -i 's/PASS_MAX_DAYS.*/PASS_MAX_DAYS 90/' /etc/login.defs
         sed -i 's/PASS_MIN_DAYS.*/PASS_MIN_DAYS 10/' /etc/login.defs
