@@ -105,7 +105,7 @@ while true; do
         # Use dialog to prompt the user for a list of usernames
         usernames=$(dialog --inputbox "Enter a list of usernames (comma-separated) who should be in the sudo group:" 0 0 --output-fd 1)
         # Removes white spaces
-        usernames=$(echo "$usernames" | tr -s ' ')
+        usernames=$(echo "$usernames" | xargs)
         if [[ -z "${usernames// }" ]]; then
           dialog --msgbox "No changes were made. Usernames were not provided." 0 0
         else
