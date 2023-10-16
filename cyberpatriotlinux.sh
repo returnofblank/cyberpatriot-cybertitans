@@ -289,7 +289,7 @@ while true; do
       if [ "$option" == 1 ]; then
         dialog  --infobox "This might take a while - Running malware check on directory '/' ..." 0 0
         apt -y install clamav clamav-daemon >/dev/null
-        clamresults=$(clamscan / --recursive)
+        clamresults=$(clamscan --exclude /proc --exclude /sys --exclude /sysfs --exclude /dev --exclude /run / --recursive)
         echo "$clamresults" | tee ./clamavresults.txt
         dialog --title "Results of malware scan" --msgbox "Output of malware scan sent to clamavresults.txt, which will be located in the directory this script is ran" 0 0
       fi
