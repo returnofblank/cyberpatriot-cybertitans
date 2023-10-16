@@ -223,7 +223,7 @@ while true; do
     servicem=$(dialog --checklist "Select what service management you want done: " 0 0 0 --output-fd 1 \
       1 "List and disable services" off \
       2 "Don't permit root login for SSH Daemon" off \
-      3 "unfilled" off \
+      3 "Manage running processes" off \
       4 "unfilled" off)
     # Run commands based on output of dialog
     for option in $servicem; do
@@ -255,9 +255,10 @@ while true; do
         systemctl restart sshd.service
         dialog --title "Root login no longer permitted for SSH Daemon" --msgbox "Root login no longer permitted for SSH Daemon!" 0 0
       fi
-      #if [ "$option" == 3 ]; then
-
-      #fi 
+      if [ "$option" == 3 ]; then
+        dialog --title "Process manager" --msgbox "This will launch htop, a utility for managing processes, once you are finished, you can press CTRL + C to exit." 0 0
+        htop
+      fi 
       #if [ "$option" == 4 ]; then
 
       #fi
