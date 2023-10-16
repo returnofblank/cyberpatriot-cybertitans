@@ -140,20 +140,14 @@ while true; do
             usermod -aG "$group_name" "$user" &>/dev/null
           done
 
-          sudodelorno=$(dialog --title "Remove sudo privileges from the following users?" --yesno "Are you sure you want to remove the following user's admin privileges?: ${users_to_remove[*]}" 0 0 --output-fd 1)
-          if [ "$sudodelorno" = "1" ]; then
-            dialog --msgbox "No users removed from sudo group. User selected no." 0 0
-            users_to_remove=""
-          else
           # Remove users from the sudo group
-            for user in "${users_to_remove[@]}"; do
+          for user in "${users_to_remove[@]}"; do
               deluser "$user" "$group_name" &>/dev/null
-            done
-          fi
+          done
+
           # Display the changes made using dialog
           add_msg="Users added to sudo group: ${users_to_add[*]}"
           remove_msg="Users removed from sudo group: ${users_to_remove[*]}"
-
           dialog --msgbox "$add_msg\n$remove_msg" 0 0
         fi
       fi
