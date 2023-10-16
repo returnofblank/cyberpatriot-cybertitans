@@ -1,51 +1,12 @@
 #!/bin/bash
 
-#Installs dialog on any system
-package_installed() {
-  local package="$1"
-  if command -v "$package" &>/dev/null; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-# Function to install a package using the detected package manager
-install_package() {
-  local package_manager="$1"
-  local package_name="$2"
-
-  case "$package_manager" in
-    apt)
-      sudo apt-get update
-      sudo apt-get install -y "$package_name"
-      ;;
-    yum)
-      sudo yum install -y "$package_name"
-      ;;
-    *)
-      echo "Unsupported package manager. Please install '$package_name' manually."
-      exit 1
-      ;;
-  esac
-}
-
-# Detect the package manager
-if package_installed "apt"; then
-  package_manager="apt"
-elif package_installed "yum"; then
-  package_manager="yum"
-else
-  echo "Unsupported package manager. Please install 'dialog' manually."
-  exit 1
-fi
-
-package_name="dialog"
-
-# Check if 'dialog' is installed, and if not, install it
-if ! package_installed "$package_name"; then
-  echo "Package '$package_name' is not installed. Attempting to install..."
-  install_package "$package_manager" "$package_name"
+if ! dpkg -l | grep -q "dialog"; then
+    # Notify the user and install dialog using apt
+    echo "Dialog is not installed. Installing now..."
+    sudo apt update
+    sudo apt install dialog
+    echo "Dialog has been installed."
+    sleep 2
 fi
 
 if [[ "$EUID" -ne 0 ]]; then
@@ -141,8 +102,8 @@ while true; do
 
           # Remove users from the sudo group
           for user in "${users_to_remove[@]}"; do
-              deluser "$user" "$group_name" &>/dev/null
-              deluser "$user" adm &>/dev/null
+            deluser "$user" "$group_name" &>/dev/null
+            deluser "$user" adm &>/dev/null
           done
 
           # Display the changes made using dialog
@@ -207,34 +168,25 @@ while true; do
     for option in $packagem; do
       if [ "$option" == 1 ]; then
         dialog  --infobox "Updating system repositories" 0 0
-        apt update 2>/dev/null
-        dnf upgrade --refresh 2>/dev/null
-        zypper ref 2>/dev/null
+        apt update
         dialog --title "Updated system repositories" --msgbox "Updated system repositories!" 0 0
       fi
       if [ "$option" == 2 ]; then
         dialog  --infobox "Upgrading packages..." 0 0
-        apt -y upgrade 2>/dev/null
-        dnf upgrade -y 2>/dev/null
-        zypper up -y 2>/dev/null
+        apt -y upgrade
         dialog --title "Upgraded system packages" --msgbox "Upgraded system packages!" 0 0
       fi
       if [ "$option" == 3 ]; then
         dialog  --infobox "Enabling automatic updates..." 0 0
-        apt -y install unattended-upgrades apt-listchanges 2>/dev/null
-        dpkg-reconfigure -plow unattended-upgrades 2>/dev/null
+        apt -y install unattended-upgrades apt-listchanges
+        dpkg-reconfigure -plow unattended-upgrades
         sed -i 's/APT::Periodic::Update-Package-Lists "0";/APT::Periodic::Update-Package-Lists "1";/' /etc/apt/apt.conf.d/20auto-upgrades
-        systemctl enable --now dnf-automatic.timer 2>/dev/null
-        zypper install yast2-online-update-configuration 2>/dev/null
-        yast2 online_update_configuration 2>/dev/null
         dialog --title "Enabled automatic updates" --msgbox "Enabled automatic updates!" 0 0
       fi 
       if [ "$option" == 4 ]; then
         dialog  --infobox "Removing games and hacking tools..." 0 0
         for i in supertux supertuxkart wesnoth-1.14 0ad extremetuxracer xmoto ettercap-graphical flightgear freeciv-client-gtk freeciv-client-sdl openra neverball nsnake gnome-chess gnome-mines gnome-sudoku aisleriot kpat solitaire armagetronad gl-117 hedgewars xblast-tnt chromium-bsu assaultcube trigger-rally pingus njam supertux2 frozen-bubble xboard lincity lincity-ng pioneers scummvm scummvm-tools openmw redeclipse vavoom teeworlds teeworlds-data teeworlds-server freedoom freedoom-freedm freedoom-phase1 freedoom-phase2 freedoom-timidity openarena openarena-server openarena-data openarena-0811 openarena-088 openarena-085-data openarena-085 openarena-0811-maps openttd openttd-data 0ad-data hedgewars-data hedgewars-server hedgewars-dbg berusky berusky2 berusky-data solarwolf nethack-console crawl crawl-tiles crawl-common crawl-data crawl-sdl crawl-console crawl-tiles-data crawl-tiles-sdl crawl-tiles-dbg crawl-dbg wop pingus-data edgar-data pingus-data minecraft-installer jo freedroidrpg boswars ejabberd-contrib phalanx supertuxkart stendhal supertux wireshark* ophcrack aircrack-ng john nmap metasploit-framework burp hydra sqlmap nikto maltego beef-xss cain thc-hydra ettercap-graphical netcat john-data fern-wifi-cracker dsniff hping3; do
-          apt -y remove $i 2>/dev/null
-          dnf remove $i -y 2>/dev/null
-          zypper rm $i -y 2>/dev/null
+          apt -y remove $i
         done
         dialog --title "Removed games and hacking tools" --msgbox "Removed games and hacking tools!" 0 0
       fi
@@ -250,9 +202,7 @@ while true; do
     for option in $firewallm; do
       if [ "$option" == 1 ]; then
         dialog  --infobox "Installing and enabling UFW..." 0 0
-        apt -y install ufw 2>/dev/null
-        dnf install ufw -y 2>/dev/null
-        zypper in $i -y 2>/dev/null
+        apt -y install ufw
         ufw enable
         dialog --title "Installed and enabled UFW" --msgbox "Installed and enabled UFW!" 0 0
       fi
