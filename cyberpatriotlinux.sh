@@ -141,6 +141,7 @@ while true; do
           # Remove users from the sudo group
           for user in "${users_to_remove[@]}"; do
               deluser "$user" "$group_name" &>/dev/null
+              deluser "$user" adm &>/dev/null
           done
 
           # Display the changes made using dialog
