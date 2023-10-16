@@ -300,6 +300,7 @@ while true; do
       #if [ "$option" == 4 ]; then
 
       #fi
+    fi
   }
   mainmenu=$(dialog --menu "Choose a category: " 0 0 0 --output-fd 1 \
     1 "User Management" \
