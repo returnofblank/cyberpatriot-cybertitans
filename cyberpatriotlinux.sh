@@ -39,8 +39,7 @@ while true; do
       3 "Remove unauthorized users" off \
       4 "Disable root login" off \
       5 "Enable password policy practices" off \
-      6 "Disable guest account, if present" off \
-      #7 "" off
+      6 "Disable guest account, if present" off
       )
     # Run commands based on output of dialog
     for option in $userm; do
@@ -162,9 +161,6 @@ while true; do
         echo "allow-guest=false" >> /etc/lightdm/lightdm.conf
         dialog --title "User Management - Guest Account" --msgbox "Guest account disabled, if present" 0 0
       fi
-      #if [ "$option" == 7 ]; then
-
-      #fi
     done
   }
   package_management_menu (){
