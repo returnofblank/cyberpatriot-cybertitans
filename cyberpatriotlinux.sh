@@ -189,7 +189,7 @@ while true; do
            current_uid=$(awk -F ':' '$1 == "'$i'" {print $3}' /etc/passwd)
           # Change the user's uid in the /etc/passwd file
           # Skip the user if it is the current user
-          if [[ "$i" != "$(whoami)" ]]; then
+          if [[ "$i" != "$(logname)" ]] && [[ "$i" != "root" ]]; then
             sed -i "s/$current_uid/$new_uid/g" /etc/passwd
           fi
           user_list="$user_list$user:$new_uid\n"
