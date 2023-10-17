@@ -226,7 +226,9 @@ while true; do
       1 "Disable & stop services" off \
       2 "Don't permit root login for SSH Daemon" off \
       3 "Enable & start services" off \
-      4 "Manage running processes" off)
+      4 "Manage running processes" off \
+      5 "Manage start-up applications" off
+      )
     # Run commands based on output of dialog
     for option in $servicem; do
       if [ "$option" == 1 ]; then
@@ -278,6 +280,11 @@ while true; do
         htop
       fi
     done
+      if [ "$option" == 3 ]; then
+        dialog --title "Service Operations - Boot-Up Manager" --msgbox "This will launch bum, a utility for managing boot-up applications, once you are finished, you can close the program to exit." 0 0
+        apt -y install bum
+        bum
+      fi
   }
   malware_management_menu () {
       malwarem=$(dialog --checklist "Select what malware management you want done: " 0 0 0 --output-fd 1 \
