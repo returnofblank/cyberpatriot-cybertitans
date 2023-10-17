@@ -168,7 +168,9 @@ while true; do
         #Convert into array
         user_array=()
         for user in $uidusers; do
+          if [[ "$user" != "root" ]]; then
             user_array+=("$user")
+          fi
         done
 
         # Add "off" after each username
