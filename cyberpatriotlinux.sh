@@ -40,7 +40,7 @@ while true; do
       4 "Disable root login" off \
       5 "Enable password policy practices" off \
       6 "Disable guest account, if present" off \
-      7 "Find and replace users with a UID of 0" off
+      #7 "" off
       )
     # Run commands based on output of dialog
     for option in $userm; do
@@ -162,34 +162,9 @@ while true; do
         echo "allow-guest=false" >> /etc/lightdm/lightdm.conf
         dialog --title "User Management - Guest Account" --msgbox "Guest account disabled, if present" 0 0
       fi
-      if [ "$option" == 7 ]; then
-        uidusers=$(getent passwd | awk -F: '$3 == 0 {print $1}')
+      #if [ "$option" == 7 ]; then
 
-        #Convert into array
-        user_array=()
-        for user in $uidusers; do
-          if [[ "$user" != "root" ]]; then
-            user_array+=("$user")
-          fi
-        done
-
-        # Add "off" after each username
-        final_user_array=()
-        for user in "${user_array[@]}"; do
-            final_user_array+=("$user" "" off)
-        done
-
-        # Use dialog to prompt the user for a list of usernames TO DELETE!!!
-        usernames=$(dialog --title "User Management - UID Replace" --checklist "These users have a UID of 0, which is insecure. Select users who aren't recgonized to have their uid changed: " 0 0 0 "${final_user_array[@]}" --output-fd 1)
-        user_list=""
-        for i in "${usernames[@]}"; do
-          # Generate a new uid based on the user's name
-          new_uid=$(echo "$i" | md5sum | cut -c1-8)
-          user_list="$user_list$user:$new_uid\n"
-        done
-
-        dialog --title "User Management - UID Replace" --msgbox "The following users have had their UID changed:\n\n$user_list" 0 0
-      fi
+      #fi
     done
   }
   package_management_menu (){
