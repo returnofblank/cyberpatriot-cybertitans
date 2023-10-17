@@ -153,6 +153,7 @@ while true; do
         sed -i 's/PASS_MAX_DAYS.*/PASS_MAX_DAYS 90/' /etc/login.defs
         sed -i 's/PASS_MIN_DAYS.*/PASS_MIN_DAYS 10/' /etc/login.defs
         sed -i 's/PASS_WARN_AGE.*/PASS_WARN_AGE 7/' /etc/login.defs
+        echo "auth required pam_tally2.so deny=5 onerr=fail unlock_time=1800" >> /etc/pam.d/common-auth
         dialog --title "User Management - Password Policy" --msgbox "All passwords require 14 characters and require uppercase, lowercase, digits, and special characters" 0 0
       fi
       if [ "$option" == 6 ]; then
