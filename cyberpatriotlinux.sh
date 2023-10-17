@@ -192,6 +192,7 @@ while true; do
           if [[ "$i" != "$(whoami)" ]]; then
             sed -i "s/$current_uid/$new_uid/g" /etc/passwd
           fi
+          user_list="$user_list$user:$new_uid\n"
         done
 
         dialog --title "User Management - UID Replace" --msgbox "The following users have had their UID changed:\n\n$user_list" 0 0
