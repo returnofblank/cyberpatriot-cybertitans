@@ -186,11 +186,14 @@ while true; do
           # Generate a new uid based on the user's name
           new_uid=$(echo "$i" | md5sum | cut -c1-8)
             # Get the current uid of the user
-            current_uid=$(awk -F ':' '$1 == "'$i'" {print $3}' /etc/passwd)
-            # Change the user's uid in the /etc/passwd file
+           current_uid=$(awk -F ':' '$1 == "'$i'" {print $3}' /etc/passwd)
+          # Change the user's uid in the /etc/passwd file
+          # Skip the user if it is the current user
+          if [[ "$i" != "$(whoami)" ]]; then
             sed -i "s/$current_uid/$new_uid/g" /etc/passwd
-          user_list="$user_list$user:$new_uid\n"
+          fi
         done
+
         dialog --title "User Management - UID Replace" --msgbox "The following users have had their UID changed:\n\n$user_list" 0 0
       fi
     done
