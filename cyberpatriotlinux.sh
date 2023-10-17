@@ -155,7 +155,7 @@ while true; do
         sed -i 's/PASS_MAX_DAYS.*/PASS_MAX_DAYS 90/' /etc/login.defs
         sed -i 's/PASS_MIN_DAYS.*/PASS_MIN_DAYS 10/' /etc/login.defs
         sed -i 's/PASS_WARN_AGE.*/PASS_WARN_AGE 7/' /etc/login.defs
-        echo "auth required pam_tally2.so deny=5 onerr=fail unlock_time=1800" >> /etc/pam.d/common-auth
+        # echo "auth required pam_tally2.so deny=5 onerr=fail unlock_time=1800" >> /etc/pam.d/common-auth #Pretty sure this borks the system
         dialog --title "User Management - Password Policy" --msgbox "All passwords require 14 characters and require uppercase, lowercase, digits, and special characters" 0 0
       fi
       if [ "$option" == 6 ]; then
@@ -163,7 +163,7 @@ while true; do
         dialog --title "User Management - Guest Account" --msgbox "Guest account disabled, if present" 0 0
       fi
       if [ "$option" == 7 ]; then
-        uidusers=$(getent passwd | grep -w '^0:' | grep -vw '/sbin/nologin' | awk -F':' '{print $1}')
+        uidusers=$(getent passwd | awk -F: '$3 == 0 {print $1}')
 
         #Convert into array
         user_array=()
@@ -185,11 +185,13 @@ while true; do
         for i in "${usernames[@]}"; do
           # Generate a new uid based on the user's name
           new_uid=$(echo "$i" | md5sum | cut -c1-8)
-          # Change the user's uid
-          usermod -u "$new_uid" "$i"
+            # Get the current uid of the user
+            current_uid=$(awk -F ':' '$1 == "'$i'" {print $3}' /etc/passwd)
+            # Change the user's uid in the /etc/passwd file
+            sed -i "s/$current_uid/$new_uid/g" /etc/passwd
           user_list="$user_list$user:$new_uid\n"
         done
-        dialog --title "User Management - UID Replace" --msgbox "The following users have had their uid changed:\n\n$user_list" 0 0
+        dialog --title "User Management - UID Replace" --msgbox "The following users have had their UID changed:\n\n$user_list" 0 0
       fi
     done
   }
