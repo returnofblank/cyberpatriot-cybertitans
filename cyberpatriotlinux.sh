@@ -327,10 +327,14 @@ while true; do
       if [ "$option" == 1 ]; then
         apt -y install clamav clamav-daemon
         directory=$(dialog --title "ClamAV Scan" --inputbox "Enter the absolute directory you want to scan:" 0 0 --output-fd 1)
-        dialog  --infobox "This might take a while - Running malware check on directory '$directory' ..." 0 0
-        clamresults=$(clamscan --exclude /proc --exclude /sys --exclude /sysfs --exclude /dev --exclude /run "$directory" --recursive)
-        echo "$clamresults" | tee ./clamavresults.txt
-        dialog --title "Results of ClamAV malware scan" --msgbox "Output of malware scan sent to clamavresults.txt, which will be located in the directory this script is ran" 0 0
+        if [ "$directory" != "" ]; then
+          dialog  --title "ClamAV Scan" --infobox "This might take a while - Running malware check on directory '$directory' ..." 0 0
+          clamresults=$(clamscan --exclude /proc --exclude /sys --exclude /sysfs --exclude /dev --exclude /run "$directory" --recursive)
+          echo "$clamresults" | tee ./clamavresults.txt
+          dialog --title "Results of ClamAV malware scan" --msgbox "Output of malware scan sent to clamavresults.txt, which will be located in the directory this script is ran" 0 0
+        else
+          dialog  --title "ClamAV Scan" --msgbox "No directory specified. No scans made." 0 0
+        fi
       fi
       if [ "$option" == 2 ]; then
         apt -y install chkrootkit
