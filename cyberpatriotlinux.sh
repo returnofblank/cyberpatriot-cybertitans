@@ -168,7 +168,9 @@ while true; do
       1 "Update system repositories" off \
       2 "Upgrade system packages" off \
       3 "Enable automatic updates" off \
-      4 "Remove potential hacking tools and games" off)
+      4 "Remove potential hacking tools and games" off \
+      5 "Remove manually installed packages" off
+      )
     # Run commands based on output of dialog
     for option in $packagem; do
       if [ "$option" == 1 ]; then
@@ -194,6 +196,31 @@ while true; do
           apt -y remove $i
         done
         dialog --title "Package Operations - Hacking Tools & Games" --msgbox "Removed games and hacking tools!" 0 0
+      fi
+      if [ "$option" == 5 ]; then
+        # Get a list of all manually installed packages
+        aptlist=$(apt list --installed | grep -F \[installed\] | awk -F'/' '{print $1}')
+
+        # Convert the package list into an array
+        package_array=()
+        for package in $aptlist; do
+            package_array+=($package)
+        done
+
+        # Add "off" after each package
+        final_package_array=()
+        for package in "${package_array[@]}"; do
+            final_package_array+=($package "" off)
+        done
+
+        # Use dialog to prompt the user for a list of usernames TO DELETE!!!
+        packages=$(dialog --title "Package Management - Remove Manually Installed Packages" --checklist "Select manually installed packages which should be DELETED (Exercise caution, not every unfamiliar package is dangerous):" 0 0 0 "${final_package_array[@]}" --output-fd 1)
+        package_list=""
+        for package in $packages; do
+          apt -y remove $package
+          package_list="$package_list$package\n"
+        done
+        dialog --title "Package Management - Deleted Packages" --msgbox "$package_list" 0 0
       fi
     done
   }
@@ -308,15 +335,15 @@ while true; do
       if [ "$option" == 2 ]; then
         apt -y install chkrootkit
         dialog  --infobox "This might take a while - Searching for root kits with CHKRootKit..." 0 0
-        chkresults=$(chkrootkit)
-        echo "$chkresults" 2>&1 | tee ./chkrootkitresults.txt
+        chkrootkit | tee ./chkrootkitresults.txt
         dialog --title "Results of CHKRootKit root kit scan" --msgbox "Output of root kit scan sent to chkrootkitresults.txt, which will be located in the directory this script is ran" 0 0
       fi
       if [ "$option" == 3 ]; then
         apt -y install rkhunter
         dialog  --infobox "This might take a while - Searching for root kits with RKHunter ..." 0 0
-        chkresults=$(rkhunter --check)
-        echo "$chkresults" 2>&1 | tee ./rkhunterresults.txt
+        rkhunter --check | tee ./rkhunterresults.txt
+        echo -e "\nResults of /var/log/rkhunter conveniently appended here!\n"
+        cat /var/log/rkhunter >> ./rkhunterresults.txt
         dialog --title "Results of RKHunter root kit scan" --msgbox "Output of root kit scan sent to rkhunterresults.txt, which will be located in the directory this script is ran" 0 0
       fi 
       #if [ "$option" == 4 ]; then
@@ -326,21 +353,20 @@ while true; do
   }
   information_management_menu () {
     infom=$(dialog --checklist "This compiles various information about the system to assist in manual interventions. This is usually items that can't be automated or isn't safe to do so: " 0 0 0 --output-fd 1 \
-      1 "List manually installed packages" off \
-      2 "List all files/directories with an attribute" off \
+      1 "List all files/directories with an attribute" off \
+      #2 "unfilled" off \
       #3 "unfilled" off \
       #4 "unfilled" off
       )
     for option in $infom; do
       if [ "$option" == 1 ]; then
-        aptlist=$(apt list --installed | grep -F \[installed\] | awk -F'/' '{print $1}')
-        dialog --title "List of all user-installed packages, scroll for more" --msgbox "$aptlist" 0 0
-      fi
-      if [ "$option" == 2 ]; then
         dialog  --infobox "Searching /etc and /home directories for files with attributes..." 0 0
         attributels=$(find /home /etc -type f -exec lsattr {} \; | grep -v -e "--------------e-------" | grep -v -e "----------------------")
         dialog --title "Files with attributes in /etc or /home" --msgbox "$attributels" 0 0
       fi
+      #if [ "$option" == 2 ]; then
+
+      #fi
       #if [ "$option" == 3 ]; then
 
       #fi
