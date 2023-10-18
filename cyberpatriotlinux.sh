@@ -291,7 +291,7 @@ while true; do
       malwarem=$(dialog --checklist "Select what malware management you want done: " 0 0 0 --output-fd 1 \
       1 "Run ClamAV anti-virus" off \
       2 "Run chkrootkit to find root kits" off \
-      3 "unfilled" off \
+      3 "Run RKHunter to find root kits" off \
       4 "unfilled" off
       )
     # Run commands based on output of dialog
@@ -302,18 +302,22 @@ while true; do
         dialog  --infobox "This might take a while - Running malware check on directory '$directory' ..." 0 0
         clamresults=$(clamscan --exclude /proc --exclude /sys --exclude /sysfs --exclude /dev --exclude /run "$directory" --recursive)
         echo "$clamresults" | tee ./clamavresults.txt
-        dialog --title "Results of malware scan" --msgbox "Output of malware scan sent to clamavresults.txt, which will be located in the directory this script is ran" 0 0
+        dialog --title "Results of ClamAV malware scan" --msgbox "Output of malware scan sent to clamavresults.txt, which will be located in the directory this script is ran" 0 0
       fi
       if [ "$option" == 2 ]; then
         apt -y install chkrootkit
-        dialog  --infobox "This might take a while - Searching for root kits ..." 0 0
+        dialog  --infobox "This might take a while - Searching for root kits with CHKRootKit..." 0 0
         chkresults=$(chkrootkit)
         echo "$chkresults" | tee ./chkrootkitresults.txt
-        dialog --title "Results of root kit scan" --msgbox "Output of root kit scan sent to chkrootkitresults.txt, which will be located in the directory this script is ran" 0 0
+        dialog --title "Results of CHKRootKit root kit scan" --msgbox "Output of root kit scan sent to chkrootkitresults.txt, which will be located in the directory this script is ran" 0 0
       fi
-      #if [ "$option" == 3 ]; then
-
-      #fi 
+      if [ "$option" == 3 ]; then
+        apt -y install rkhunter
+        dialog  --infobox "This might take a while - Searching for root kits with RKHunter ..." 0 0
+        chkresults=$(rkhunter --check)
+        echo "$chkresults" | tee ./rkhunterresults.txt
+        dialog --title "Results of RKHunter root kit scan" --msgbox "Output of root kit scan sent to rkhunterresults.txt, which will be located in the directory this script is ran" 0 0
+      fi 
       #if [ "$option" == 4 ]; then
 
       #fi
