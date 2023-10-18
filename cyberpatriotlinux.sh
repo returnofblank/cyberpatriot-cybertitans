@@ -317,7 +317,7 @@ while true; do
   information_management_menu () {
     infom=$(dialog --checklist "This compiles various information about the system to assist in manual interventions. This is usually items that can't be automated or isn't safe to do so: " 0 0 0 --output-fd 1 \
       1 "List manually installed packages" off \
-      2 "unfilled" off \
+      2 "List all files/directories with an attribute" off \
       3 "unfilled" off \
       4 "unfilled" off
       )
@@ -327,9 +327,10 @@ while true; do
         aptlist=$(apt list --installed | grep -F \[installed\] | awk -F'/' '{print $1}')
         dialog --title "Manually Installed Packages" --msgbox "$aptlist" 0 0
       fi
-      #if [ "$option" == 2 ]; then
-
-      #fi
+      if [ "$option" == 2 ]; then
+        attributels=$(find "/" -type d \( -name proc -o -name sys -o -name dev -o -name snap -o -name boot -o -name run \) -prune -o -type f -exec lsattr {} \; | grep -v -e "--------------e-------" | grep -v -e "----------------------")
+        dialog --title "Files with attributes" --msgbox "$aptlist" 0 0
+      fi
       #if [ "$option" == 3 ]; then
 
       #fi
