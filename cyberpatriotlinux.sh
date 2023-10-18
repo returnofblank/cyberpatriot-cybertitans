@@ -200,9 +200,9 @@ while true; do
   firewall_management_menu (){
     firewallm=$(dialog --checklist "Select what firewall operations you want done: " 0 0 0 --output-fd 1 \
       1 "Install UFW and enable" off \
-      2 "unfilled" off \
-      3 "unfilled" off \
-      4 "unfilled" off)
+    #  2 "unfilled" off \
+    #  3 "unfilled" off \
+    #  4 "unfilled" off)
     # Run commands based on output of dialog
     for option in $firewallm; do
       if [ "$option" == 1 ]; then
@@ -292,7 +292,7 @@ while true; do
       1 "Run ClamAV anti-virus" off \
       2 "Run chkrootkit to find root kits" off \
       3 "Run RKHunter to find root kits" off \
-      4 "unfilled" off
+      #4 "unfilled" off
       )
     # Run commands based on output of dialog
     for option in $malwarem; do
@@ -327,8 +327,8 @@ while true; do
     infom=$(dialog --checklist "This compiles various information about the system to assist in manual interventions. This is usually items that can't be automated or isn't safe to do so: " 0 0 0 --output-fd 1 \
       1 "List manually installed packages" off \
       2 "List all files/directories with an attribute" off \
-      3 "unfilled" off \
-      4 "unfilled" off
+      #3 "unfilled" off \
+      #4 "unfilled" off
       )
     for option in $infom; do
       if [ "$option" == 1 ]; then
