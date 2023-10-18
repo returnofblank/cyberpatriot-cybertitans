@@ -50,7 +50,7 @@ while true; do
         # Concatenate all of the username and password pairs into a single string
         password_list=""
         for users in "${sudo_user_array[@]}"; do
-          if [ "$users" = "$(logname)" ]; then
+          if [ "$users" = $(logname) ]; then
             # Skip the current user
             continue
           fi
@@ -72,7 +72,7 @@ while true; do
         if [[ -z "${usernames// }" ]]; then
           dialog --title "User Management - Sudo Group" --msgbox "No changes were made. Usernames were not provided." 0 0
         else
-          current_sudo_users=$(getent group $group_name | cut -d ':' -f 4 | tr ',' ' ')
+          current_sudo_users=($(getent group $group_name | cut -d ':' -f 4 | tr ',' ' '))
 
           # Convert the input to an array
           IFS=',' read -ra user_array <<< "$usernames"
@@ -84,7 +84,7 @@ while true; do
           # Iterate through the user array
           for user in "${user_array[@]}"; do
           # Check if the user is already in the sudo group or if it's the current user
-            if [[ " ${current_sudo_users[*]} " =~ $user || "$user" == $(logname) ]]; then
+            if [[ " ${current_sudo_users[*]} " =~ " $user " || "$user" == $(logname) ]]; then
               continue
             else
               users_to_add+=("$user")
@@ -93,7 +93,7 @@ while true; do
 
           # Iterate through the current sudo users to find those to remove
           for user in "${current_sudo_users[@]}"; do
-            if [[ ! " ${user_array[*]} " =~ $user && "$user" != $(logname) ]]; then
+            if [[ ! " ${user_array[*]} " =~ " $user " && "$user" != $(logname) ]]; then
               users_to_remove+=("$user")
             fi
           done
@@ -122,17 +122,17 @@ while true; do
         # Convert the user list into an array
         user_array=()
         for user in $users; do
-            user_array+=("$user")
+            user_array+=($user)
         done
 
         # Sort the user array
-        IFS=$'\n' sorted_user_array=$(sort <<<"${user_array[*]}")
+        IFS=$'\n' sorted_user_array=($(sort <<<"${user_array[*]}"))
         unset IFS
 
         # Add "off" after each username
         final_user_array=()
         for user in "${sorted_user_array[@]}"; do
-            final_user_array+=("$user" "" off)
+            final_user_array+=($user "" off)
         done
 
         # Use dialog to prompt the user for a list of usernames TO DELETE!!!
@@ -191,7 +191,7 @@ while true; do
       if [ "$option" == 4 ]; then
         dialog  --infobox "Removing games and hacking tools..." 0 0
         for i in supertux supertuxkart wesnoth-1.14 0ad extremetuxracer xmoto ettercap-graphical flightgear freeciv-client-gtk freeciv-client-sdl openra neverball nsnake gnome-chess gnome-mines gnome-sudoku aisleriot kpat solitaire armagetronad gl-117 hedgewars xblast-tnt chromium-bsu assaultcube trigger-rally pingus njam supertux2 frozen-bubble xboard lincity lincity-ng pioneers scummvm scummvm-tools openmw redeclipse vavoom teeworlds teeworlds-data teeworlds-server freedoom freedoom-freedm freedoom-phase1 freedoom-phase2 freedoom-timidity openarena openarena-server openarena-data openarena-0811 openarena-088 openarena-085-data openarena-085 openarena-0811-maps openttd openttd-data 0ad-data hedgewars-data hedgewars-server hedgewars-dbg berusky berusky2 berusky-data solarwolf nethack-console crawl crawl-tiles crawl-common crawl-data crawl-sdl crawl-console crawl-tiles-data crawl-tiles-sdl crawl-tiles-dbg crawl-dbg wop pingus-data edgar-data pingus-data minecraft-installer jo freedroidrpg boswars ejabberd-contrib phalanx supertuxkart stendhal supertux wireshark* ophcrack aircrack-ng john nmap metasploit-framework burp hydra sqlmap nikto maltego beef-xss cain thc-hydra ettercap-graphical netcat john-data fern-wifi-cracker dsniff hping3; do
-          apt -y remove "$i"
+          apt -y remove $i
         done
         dialog --title "Package Operations - Hacking Tools & Games" --msgbox "Removed games and hacking tools!" 0 0
       fi
@@ -234,22 +234,22 @@ while true; do
     for option in $servicem; do
       if [ "$option" == 1 ]; then
         # Get a list of all running services
-        services=$(systemctl list-units --type=service --state=active --no-pager --plain | awk '{print $1}')
+        services=($(systemctl list-units --type=service --state=active --no-pager --plain | awk '{print $1}'))
 
         excluded=("${services[@]:1:$((${#services[@]} - 5))}")
 
         # Add "off" after each output
         final_output_array=()
         for output in "${excluded[@]}"; do
-            final_output_array+=("$output" "" off)
+            final_output_array+=($output "" off)
         done
             
         # Use dialog to prompt the user for a list of services to stop
         servicenames=$(dialog --checklist "Select which services should be disabled:" 0 0 0 "${final_output_array[@]}" --output-fd 1)
         service_list=""
         for service in $servicenames; do
-          systemctl disable "$service" >/dev/null
-          systemctl stop "$service" >/dev/null
+          systemctl disable $service >/dev/null
+          systemctl stop $service >/dev/null
           service_list="$service_list$service\n"
         done
         dialog --title "Service Operations - Disabled Services" --msgbox "$service_list" 0 0
@@ -271,7 +271,7 @@ while true; do
             systemctl enable "$service" >/dev/null
             systemctl start "$service" >/dev/null
           done
-          add_msg="Services enabled and started: ${services_array[*]}"
+          add_msg="Services enabled and started: ${services_array[@]}"
           dialog --title "Service Operations - Enable & Start Services" --msgbox "$add_msg" 0 0
         fi
       fi 
