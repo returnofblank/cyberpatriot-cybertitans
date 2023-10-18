@@ -323,11 +323,11 @@ while true; do
       )
     for option in $infom; do
       if [ "$option" == 1 ]; then
-        dialog  --infobox "List of all user-installed packages, scroll for more" 0 0
         aptlist=$(apt list --installed | grep -F \[installed\] | awk -F'/' '{print $1}')
-        dialog --title "Manually Installed Packages" --msgbox "$aptlist" 0 0
+        dialog --title "List of all user-installed packages, scroll for more" --msgbox "$aptlist" 0 0
       fi
       if [ "$option" == 2 ]; then
+        dialog  --infobox "Searching /etc and /home directories for files with attributes..." 0 0
         attributels=$(find /home /etc -type f -exec lsattr {} \; | grep -v -e "--------------e-------" | grep -v -e "----------------------")
         dialog --title "Files with attributes in /etc or /home" --msgbox "$attributels" 0 0
       fi
