@@ -308,14 +308,14 @@ while true; do
         apt -y install chkrootkit
         dialog  --infobox "This might take a while - Searching for root kits with CHKRootKit..." 0 0
         chkresults=$(chkrootkit)
-        echo "$chkresults" | tee ./chkrootkitresults.txt
+        echo "$chkresults" 2>&1 | tee ./chkrootkitresults.txt
         dialog --title "Results of CHKRootKit root kit scan" --msgbox "Output of root kit scan sent to chkrootkitresults.txt, which will be located in the directory this script is ran" 0 0
       fi
       if [ "$option" == 3 ]; then
         apt -y install rkhunter
         dialog  --infobox "This might take a while - Searching for root kits with RKHunter ..." 0 0
         chkresults=$(rkhunter --check)
-        echo "$chkresults" | tee ./rkhunterresults.txt
+        echo "$chkresults" 2>&1 | tee ./rkhunterresults.txt
         dialog --title "Results of RKHunter root kit scan" --msgbox "Output of root kit scan sent to rkhunterresults.txt, which will be located in the directory this script is ran" 0 0
       fi 
       #if [ "$option" == 4 ]; then
