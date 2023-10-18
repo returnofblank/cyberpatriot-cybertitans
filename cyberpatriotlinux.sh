@@ -292,7 +292,8 @@ while true; do
       1 "Run ClamAV anti-virus - Do this last, it will take a very long time as it scans everything under '/'" off \
       2 "unfilled" off \
       3 "unfilled" off \
-      4 "unfilled" off)
+      4 "unfilled" off
+      )
     # Run commands based on output of dialog
     for option in $malwarem; do
       if [ "$option" == 1 ]; then
@@ -313,13 +314,39 @@ while true; do
       #fi
     done
   }
+  information_management_menu () {
+    infom=$(dialog --checklist "This compiles various information about the system to assist in manual interventions. This is usually items that can't be automated or isn't safe to do so: " 0 0 0 --output-fd 1 \
+      1 "List manually installed packages" off \
+      2 "List all files/directories with an attribute" off \
+      3 "unfilled" off \
+      4 "unfilled" off
+      )
+    for option in $infom; do
+      if [ "$option" == 1 ]; then
+        aptlist=$(apt list --installed | grep -F \[installed\] | awk -F'/' '{print $1}')
+        dialog --title "List of all user-installed packages, scroll for more" --msgbox "$aptlist" 0 0
+      fi
+      if [ "$option" == 2 ]; then
+        dialog  --infobox "Searching /etc and /home directories for files with attributes..." 0 0
+        attributels=$(find /home /etc -type f -exec lsattr {} \; | grep -v -e "--------------e-------" | grep -v -e "----------------------")
+        dialog --title "Files with attributes in /etc or /home" --msgbox "$attributels" 0 0
+      fi
+      #if [ "$option" == 3 ]; then
+
+      #fi
+      #if [ "$option" == 4 ]; then
+
+      #fi
+    done
+  }
   mainmenu=$(dialog --menu "Choose a category: " 0 0 0 --output-fd 1 \
     1 "User Management" \
     2 "Package Management & Updates" \
     3 "Firewall" \
     4 "Service Management" \
     5 "Malware Checks" \
-    6 "Finished (Close Prompt)"
+    6 "Information" \
+    7 "Finished (Close Prompt)"
   )
   if [ $? -ne 0 ]; then
         clear && break
@@ -330,7 +357,8 @@ while true; do
     3) firewall_management_menu ;;
     4) service_management_menu ;;
     5) malware_management_menu ;;
-    6) clear && exit 0 ;;
+    6) information_management_menu ;;
+    7) clear && exit 0 ;;
   esac
 done
 
