@@ -289,7 +289,7 @@ while true; do
   }
   malware_management_menu () {
       malwarem=$(dialog --checklist "Select what malware management you want done: " 0 0 0 --output-fd 1 \
-      1 "Run ClamAV anti-virus - Do this last, it will take a very long time as it scans everything under '/'" off \
+      1 "Run ClamAV anti-virus" off \
       2 "unfilled" off \
       3 "unfilled" off \
       4 "unfilled" off
@@ -297,9 +297,10 @@ while true; do
     # Run commands based on output of dialog
     for option in $malwarem; do
       if [ "$option" == 1 ]; then
+        apt -y install clamav clamav-daemon
+        directory=$(dialog --title "ClamAV Scan" --inputbox "Enter the absolute directory you want to scan:" 0 0 --output-fd 1)
         dialog  --infobox "This might take a while - Running malware check on directory '/' ..." 0 0
-        apt -y install clamav clamav-daemon >/dev/null
-        clamresults=$(clamscan --exclude /proc --exclude /sys --exclude /sysfs --exclude /dev --exclude /run / --recursive)
+        clamresults=$(clamscan --exclude /proc --exclude /sys --exclude /sysfs --exclude /dev --exclude /run "$directory" --recursive)
         echo "$clamresults" | tee ./clamavresults.txt
         dialog --title "Results of malware scan" --msgbox "Output of malware scan sent to clamavresults.txt, which will be located in the directory this script is ran" 0 0
       fi
