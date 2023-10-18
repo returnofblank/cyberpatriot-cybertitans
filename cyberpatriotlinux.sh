@@ -308,15 +308,15 @@ while true; do
       if [ "$option" == 2 ]; then
         apt -y install chkrootkit
         dialog  --infobox "This might take a while - Searching for root kits with CHKRootKit..." 0 0
-        chkresults=$(chkrootkit)
-        echo "$chkresults" 2>&1 | tee ./chkrootkitresults.txt
+        chkrootkit | tee ./chkrootkitresults.txt
         dialog --title "Results of CHKRootKit root kit scan" --msgbox "Output of root kit scan sent to chkrootkitresults.txt, which will be located in the directory this script is ran" 0 0
       fi
       if [ "$option" == 3 ]; then
         apt -y install rkhunter
         dialog  --infobox "This might take a while - Searching for root kits with RKHunter ..." 0 0
-        chkresults=$(rkhunter --check)
-        echo "$chkresults" 2>&1 | tee ./rkhunterresults.txt
+        rkhunter --check | tee ./rkhunterresults.txt
+        echo -e "\nResults of /var/log/rkhunter conveniently appended here!\n"
+        cat /var/log/rkhunter >> ./rkhunterresults.txt
         dialog --title "Results of RKHunter root kit scan" --msgbox "Output of root kit scan sent to rkhunterresults.txt, which will be located in the directory this script is ran" 0 0
       fi 
       #if [ "$option" == 4 ]; then
@@ -333,8 +333,29 @@ while true; do
       )
     for option in $infom; do
       if [ "$option" == 1 ]; then
+        # Get a list of all manually installed packages
         aptlist=$(apt list --installed | grep -F \[installed\] | awk -F'/' '{print $1}')
-        dialog --title "List of all user-installed packages, scroll for more" --msgbox "$aptlist" 0 0
+
+        # Convert the package list into an array
+        package_array=()
+        for package in $aptlist; do
+            package_array+=($package)
+        done
+
+        # Add "off" after each package
+        final_package_array=()
+        for package in "${package_array[@]}"; do
+            final_package_array+=($package "" off)
+        done
+
+        # Use dialog to prompt the user for a list of usernames TO DELETE!!!
+        packages=$(dialog --title "Package Management - Remove Manually Installed Packages" --checklist "Select manually installed packages which should be DELETED (Exercise caution, not every unfamiliar package is dangerous):" 0 0 0 "${final_package_array[@]}" --output-fd 1)
+        package_list=""
+        for package in $packages; do
+          apt -y remove $package
+          package_list="$package_list$package\n"
+        done
+        dialog --title "Package Management - Deleted Packages" --msgbox "$user_list" 0 0
       fi
       if [ "$option" == 2 ]; then
         dialog  --infobox "Searching /etc and /home directories for files with attributes..." 0 0
