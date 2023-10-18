@@ -283,9 +283,9 @@ while true; do
       fi
     done
       if [ "$option" == 3 ]; then
-        dialog --title "Service Operations - Boot-Up Manager" --msgbox "This will launch bum, a utility for managing boot-up applications, once you are finished, you can close the program to exit." 0 0
-        apt -y install bum
-        bum
+        dialog --title "Service Operations - Boot-Up Manager" --msgbox "This will launch stacer, a utility for managing boot-up applications, once you are finished, you can close the program to exit." 0 0
+        apt -y install stacer
+        stacer
       fi
   }
   malware_management_menu () {
