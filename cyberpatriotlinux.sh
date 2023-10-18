@@ -316,7 +316,7 @@ while true; do
   }
   information_management_menu () {
     infom=$(dialog --checklist "This compiles various information about the system to assist in manual interventions. This is usually items that can't be automated or isn't safe to do so: " 0 0 0 --output-fd 1 \
-      1 "List manually installed packages not normally included with the system" off \
+      1 "List manually installed packages" off \
       2 "unfilled" off \
       3 "unfilled" off \
       4 "unfilled" off
