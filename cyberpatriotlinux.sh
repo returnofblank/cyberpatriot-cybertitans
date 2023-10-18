@@ -202,7 +202,8 @@ while true; do
       1 "Install UFW and enable" off \
     #  2 "unfilled" off \
     #  3 "unfilled" off \
-    #  4 "unfilled" off)
+    #  4 "unfilled" off
+    )
     # Run commands based on output of dialog
     for option in $firewallm; do
       if [ "$option" == 1 ]; then
