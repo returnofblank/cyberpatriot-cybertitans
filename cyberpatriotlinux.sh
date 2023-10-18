@@ -328,8 +328,8 @@ while true; do
         dialog --title "Manually Installed Packages" --msgbox "$aptlist" 0 0
       fi
       if [ "$option" == 2 ]; then
-        attributels=$(find "/" -type d \( -name proc -o -name sys -o -name dev -o -name snap -o -name boot -o -name run \) -prune -o -type f -exec lsattr {} \; | grep -v -e "--------------e-------" | grep -v -e "----------------------")
-        dialog --title "Files with attributes" --msgbox "$aptlist" 0 0
+        attributels=$(find /home /etc -type f -exec lsattr {} \; | grep -v -e "--------------e-------" | grep -v -e "----------------------")
+        dialog --title "Files with attributes in /etc or /home" --msgbox "$attributels" 0 0
       fi
       #if [ "$option" == 3 ]; then
 
