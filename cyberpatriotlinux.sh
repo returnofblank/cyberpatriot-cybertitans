@@ -39,7 +39,8 @@ while true; do
       3 "Remove unauthorized users" off \
       4 "Disable root login" off \
       5 "Enable password policy practices" off \
-      6 "Disable guest account, if present" off
+      6 "Disable guest account, if present" off \
+      7 "Enable various user settings" off
       )
     # Run commands based on output of dialog
     for option in $userm; do
@@ -149,8 +150,8 @@ while true; do
         dialog --title "User Management - Root Disabled" --msgbox "Login no longer enabled for Root user" 0 0
       fi
       if [ "$option" == 5 ]; then
-        echo -e "minlen = 14\nucredit = -1\nlcredit = -1\nocredit = -1\ndcredit = -1" >> /etc/security/pwquality.conf
-        sed -i '/pam_unix.so/ s/$/ remember=5 minlen=14/' /etc/pam.d/common-password
+        echo -e "minlen = 14\nucredit = -1\nlcredit = -1\nocredit = -1\ndcredit = -1\nusercheck=1" >> /etc/security/pwquality.conf
+        sed -i '/pam_unix.so/ s/$/ remember=5 minlen=14 sha512/' /etc/pam.d/common-password
         sed -i 's/PASS_MAX_DAYS.*/PASS_MAX_DAYS 90/' /etc/login.defs
         sed -i 's/PASS_MIN_DAYS.*/PASS_MIN_DAYS 10/' /etc/login.defs
         sed -i 's/PASS_WARN_AGE.*/PASS_WARN_AGE 7/' /etc/login.defs
@@ -160,6 +161,13 @@ while true; do
       if [ "$option" == 6 ]; then
         echo "allow-guest=false" >> /etc/lightdm/lightdm.conf
         dialog --title "User Management - Guest Account" --msgbox "Guest account disabled, if present" 0 0
+      fi
+      if [ "$option" == 7 ]; then
+        sudo -u "$(logname)" gsettings set org.gnome.desktop.session idle-delay 300 2> /dev/null
+        sudo -u "$(logname)" xset s 300 2> /dev/null
+        sudo -u "$(logname)" gsettings get org.gnome.desktop.screensaver lock-enabled true
+        sudo -u "$(logname)" gsettings set org.gnome.desktop.screensaver lock-delay 0
+        dialog --title "User Management - Various Tweaks" --msgbox "Enabled various tweaks!" 0 0
       fi
     done
   }
@@ -256,7 +264,8 @@ while true; do
       2 "Don't permit root login for SSH Daemon" off \
       3 "Enable & start services" off \
       4 "Manage running processes" off \
-      5 "Manage start-up applications" off
+      5 "Manage start-up applications" off \
+      6 "Enable various kernel security measures" off
       )
     # Run commands based on output of dialog
     for option in $servicem; do
@@ -308,12 +317,27 @@ while true; do
         apt -y install htop >/dev/null
         htop
       fi
-    done
-      if [ "$option" == 3 ]; then
+      if [ "$option" == 5 ]; then
         dialog --title "Service Operations - Boot-Up Manager" --msgbox "This will launch stacer, a utility for managing boot-up applications, once you are finished, you can close the program to exit." 0 0
         apt -y install stacer
         stacer
       fi
+      if [ "$option" == 6 ]; then
+        touch /etc/sysctl.d/99-custom.conf
+        echo "net.ipv4.tcp_syncookies = 1" >> /etc/sysctl.d/99-custom.conf
+        echo "net.ipv4.tcp_rfc1337 = 1" >> /etc/sysctl.d/99-custom.conf
+        echo "net.ipv4.ip_forward = 0" >> /etc/sysctl.d/99-custom.conf
+        echo "net.ipv4.conf.all.accept_source_route=0" >> /etc/sysctl.d/99-custom.conf
+        echo "net.ipv4.conf.all.accept_redirects=0" >> /etc/sysctl.d/99-custom.conf
+        echo "net.ipv4.conf.default.accept_redirects=0" >> /etc/sysctl.d/99-custom.conf
+        echo "net.ipv4.conf.all.log_martians=1 " >> /etc/sysctl.d/99-custom.conf
+        echo "net.ipv4.conf.default.log_martians=1" >> /etc/sysctl.d/99-custom.conf
+        echo "net.ipv4.conf.all.rp_filter = 1" >> /etc/sysctl.d/99-custom.conf
+        echo "net.ipv4.conf.all.send_redirects = 0" >> /etc/sysctl.d/99-custom.conf
+        dialog  --title "Service Management - Kernel Security Measures" --msgbox "Implemented various kernel tweaks!" 0 0
+        sysctl -p 
+      fi
+    done
   }
   malware_management_menu () {
       malwarem=$(dialog --checklist "Select what malware management you want done: " 0 0 0 --output-fd 1 \
