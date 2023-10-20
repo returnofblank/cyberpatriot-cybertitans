@@ -430,7 +430,7 @@ while true; do
         dialog --title "Found these files with a SUID/GUID permission set to it" --msgbox "$suidguid" 0 0
       fi
       if [ "$option" == 5 ]; then
-        dialog --title "Information - List Contents of /etc/hosts" --msgbox "This will launch visudo using the nano editor, press CTRL + X to exit, and choose whether to save or not. Beware, what you do here can break the system!"" 0 0
+        dialog --title "Information - List Contents of /etc/hosts" --msgbox "This will launch visudo using the nano editor, press CTRL + X to exit, and choose whether to save or not. Beware, what you do here can break the system!" 0 0
         nano /etc/hosts
       fi
     done
