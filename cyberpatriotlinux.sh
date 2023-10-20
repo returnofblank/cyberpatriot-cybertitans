@@ -394,7 +394,7 @@ while true; do
         dialog  --infobox "This might take a while - Searching for root kits with RKHunter ..." 0 0
         rkhunter --check | tee ./rkhunterresults.txt
         echo -e "\nResults of /var/log/rkhunter conveniently appended here!\n"
-        cat /var/log/rkhunter >> ./rkhunterresults.txt
+        cat /var/log/rkhunter | tee -a ./rkhunterresults.txt
         dialog --title "Results of RKHunter root kit scan" --msgbox "Output of root kit scan sent to rkhunterresults.txt, which will be located in the directory this script is ran" 0 0
       fi 
       #if [ "$option" == 4 ]; then
