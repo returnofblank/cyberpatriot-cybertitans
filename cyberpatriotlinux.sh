@@ -266,7 +266,10 @@ while true; do
       2 "Don't permit root login for SSH Daemon" off \
       3 "Enable & start services" off \
       4 "Manage running processes" off \
-      5 "Manage start-up applications" off 
+      5 "Manage start-up applications" off \
+      6 "Don't permit password login for SSH Daemon" off \
+      7 "Randomize port used for SSH Daemon" off \
+      8 "Enable AppArmor security module" off
       )
     # Run commands based on output of dialog
     for option in $servicem; do
@@ -322,6 +325,32 @@ while true; do
         dialog --title "Service Operations - Boot-Up Manager" --msgbox "This will launch stacer, a utility for managing boot-up applications, once you are finished, you can close the program to exit." 0 0
         apt -y install stacer
         stacer
+      fi
+      if [ "$option" == 6 ]; then
+        sed -i 's/^\(PasswordAuthentication\) yes$/\1 no/' /etc/ssh/sshd_config
+        systemctl restart sshd.service
+        dialog --title "Service Operations - SSHD Password Authentication" --msgbox "Passwords disabled for SSH Daemon! SSH keys must now be used to connect." 0 0
+      fi
+      if [ "$option" == 7 ]; then
+        # Define the valid range of SSH ports
+        MIN_PORT=1024
+        MAX_PORT=49151
+
+        # Generate a random port within the valid range
+        RANDOM_PORT=$(shuf -i $MIN_PORT-$MAX_PORT -n 1)
+
+        # Set the new SSH port in the configuration file
+        sed -i "s/^\(Port\) [0-9]\+$/\1 $RANDOM_PORT/" "/etc/ssh/sshd_config"
+
+        # Restart the SSH server to apply the new port
+        systemctl restart ssh
+
+        dialog --title "Service Operations - SSHD Port Randomization" --msgbox "New SSHD port is $RANDOM_PORT: " 0 0
+      fi
+      if [ "$option" == 8 ]; then
+        systemctl enable apparmor.service >/dev/null
+        systemctl start apparmor.service >/dev/null
+        dialog --title "Service Operations - Enable & Start AppArmor" --msgbox "App Armor is now enabled!" 0 0
       fi
     done
   }
@@ -403,7 +432,8 @@ while true; do
       1 "Configure secure kernel parameters" off \
       2 "Configure sudoers file (Caution: Incorrect configuration can and will break your system!)" off \
       3 "Secure permissions of /etc/passwd and /etc/shadow" off \
-      #4 "unfilled" off
+      4 "Disable system core dump" off \
+      5 "List & remove loaded kernel modules" off
       )
       # Run commands based on output of dialog
     for option in $systemm; do
@@ -420,7 +450,7 @@ while true; do
         echo "net.ipv4.conf.all.rp_filter = 1" >> /etc/sysctl.d/99-custom.conf
         echo "net.ipv4.conf.all.send_redirects = 0" >> /etc/sysctl.d/99-custom.conf
         dialog  --title "System Management - Kernel Security Measures" --msgbox "Implemented various kernel tweaks!" 0 0
-        sysctl -p 
+        sysctl -p /etc/sysctl.d/99-custom.conf
       fi
       if [ "$option" == 2 ]; then
         dialog  --title "System Management - Sudoers File Config" --msgbox "This will launch visudo using the nano editor config, press CTRL + X to exit, and choose whether to save or not. Beware, what you do here can break the system" 0 0
@@ -430,6 +460,33 @@ while true; do
         chmod 644 /etc/passwd
         chmod 640 /etc/shadow
         dialog  --title "System Management - Permissions Config" --msgbox "Changed /etc/passwd to use 644 permissions, /etc/shadow to use 640 permissions" 0 0
+      fi
+      if [ "$option" == 4 ]; then
+        echo '* hard core 0' >> /etc/security/limits.conf
+        echo '* soft core 0' >> /etc/security/limits.conf
+        touch /etc/sysctl.d/9999-disable-core-dump.conf
+        echo "fs.suid_dumpable=0" >> /etc/sysctl.d/9999-disable-core-dump.conf
+        echo "kernel.core_pattern=|/bin/false" >> /etc/sysctl.d/9999-disable-core-dump.conf
+        sysctl -p /etc/sysctl.d/9999-disable-core-dump.conf
+      fi
+      if [ "$option" == 5 ]; then
+        # Get a list of all loaded modules
+        modules=$(lsmod | awk '{print $1}' | tail -n +2)
+
+        # Add "off" after each output
+        final_output_array=()
+        for output in "${excluded[@]}"; do
+            final_output_array+=($output "" off)
+        done
+            
+        # Use dialog to prompt the user for a list of services to stop
+        modulenames=$(dialog --checklist "Select which modules should be removed:" 0 0 0 "${final_output_array[@]}" --output-fd 1)
+        module_list=""
+        for module in $modulenames; do
+          modprobe -r "$module"
+          module_list="$module_list$module\n"
+        done
+        dialog --title "System Management - Disable Modules" --msgbox "$module_list" 0 0
       fi
     done
   }
