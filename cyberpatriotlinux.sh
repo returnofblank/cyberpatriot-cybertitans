@@ -151,11 +151,13 @@ while true; do
       fi
       if [ "$option" == 5 ]; then
         echo -e "minlen = 14\nucredit = -1\nlcredit = -1\nocredit = -1\ndcredit = -1\nusercheck=1" >> /etc/security/pwquality.conf
+        sed -i '/pam_unix.so/s/ sha.*//'
         sed -i '/pam_unix.so/ s/$/ remember=5 minlen=14 sha512/' /etc/pam.d/common-password
         sed -i 's/PASS_MAX_DAYS.*/PASS_MAX_DAYS 90/' /etc/login.defs
         sed -i 's/PASS_MIN_DAYS.*/PASS_MIN_DAYS 10/' /etc/login.defs
         sed -i 's/PASS_WARN_AGE.*/PASS_WARN_AGE 7/' /etc/login.defs
-        # echo "auth required pam_tally2.so deny=5 onerr=fail unlock_time=1800" >> /etc/pam.d/common-auth #Pretty sure this borks the system
+        echo "auth    required    pam_faillock.so preauth audit silent deny=5 unlock_time=900" >> /etc/pam.d/common-auth
+        # echo "auth    required    pam_tally2.so deny=5 onerr=fail unlock_time=1800" >> /etc/pam.d/common-auth #Pretty sure this borks the system
         dialog --title "User Management - Password Policy" --msgbox "All passwords require 14 characters and require uppercase, lowercase, digits, and special characters" 0 0
       fi
       if [ "$option" == 6 ]; then
@@ -367,8 +369,9 @@ while true; do
     infom=$(dialog --checklist "This compiles various information about the system to assist in manual interventions. This is usually items that can't be automated or isn't safe to do so: " 0 0 0 --output-fd 1 \
       1 "List all files/directories with an attribute" off \
       2 "List potential unauthorized files in /home" off \
-      #3 "unfilled" off \
-      #4 "unfilled" off
+      3 "List contents of /etc/grub.d/40_custom to check for malicious options" off \
+      4 "List files with a SUID or GUID permission value set to it, this could be used for malicious purposes" off \
+      5 "List contents of /etc/hosts file to find potentially harmful DNS redirects"
       )
     for option in $infom; do
       if [ "$option" == 1 ]; then
@@ -381,19 +384,25 @@ while true; do
         filels=$(find /home -type f \( -name "*.mp3" -o -name "*.png" -o -name "*.mp4" -o -name "*.mkv" -o -name "*.webm" -o -name "*.webp" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.avi" -o -name "*.flv" -o -name "*.mov" -o -name "*.wmv" -o -name "*.m4v" \))
         dialog --title "Found these potentially unauthorized files!" --msgbox "$filels" 0 0
       fi
-      #if [ "$option" == 3 ]; then
-
-      #fi
-      #if [ "$option" == 4 ]; then
-
-      #fi
+      if [ "$option" == 3 ]; then
+        dialog --title "Information - List Contents of Grub File" --msgbox "This will open up a file with the 'less' command, press 'q' to exit from 'less'" 0 0
+        less /etc/grub.d/40_custom
+      fi
+      if [ "$option" == 4 ]; then
+        suidguid=$(find / -type f \( -perm /4000 -o -perm /2000 \) -exec stat -c "%A %U %n" {} \;)
+        dialog --title "Found these files with a SUID/GUID permission set to it" --msgbox "$suidguid" 0 0
+      fi
+      if [ "$option" == 5 ]; then
+        dialog --title "Information - List Contents of /etc/hosts" --msgbox "This will open up a file with the 'less' command, press 'q' to exit from 'less'" 0 0
+        less /etc/hosts
+      fi
     done
   }
   system_management_menu () {
     systemm=$(dialog --checklist "Does general system management fixes that can't be classified as any of the other classifications:" 0 0 0 --output-fd 1 \
       1 "Configure secure kernel parameters" off \
       2 "Configure sudoers file (Caution: Incorrect configuration can and will break your system!)" off \
-      #3 "unfilled" off \
+      3 "Secure permissions of /etc/passwd and /etc/shadow" off \
       #4 "unfilled" off
       )
       # Run commands based on output of dialog
@@ -416,6 +425,11 @@ while true; do
       if [ "$option" == 2 ]; then
         dialog  --title "System Management - Sudoers File Config" --msgbox "This will launch visudo using the nano editor config, press CTRL + X to exit, and choose whether to save or not. Beware, what you do here can break the system" 0 0
         EDITOR=/usr/bin/nano visudo
+      fi
+      if [ "$option" == 3 ]; then
+        chmod 644 /etc/passwd
+        chmod 640 /etc/shadow
+        dialog  --title "System Management - Permissions Config" --msgbox "Changed /etc/passwd to use 644 permissions, /etc/shadow to use 640 permissions" 0 0
       fi
     done
   }
