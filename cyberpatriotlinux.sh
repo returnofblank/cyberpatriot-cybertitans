@@ -454,7 +454,7 @@ while true; do
         sysctl -p /etc/sysctl.d/99-custom.conf
       fi
       if [ "$option" == 2 ]; then
-        dialog  --title "System Management - Sudoers File Config" --msgbox "This will launch visudo using the nano editor config, press CTRL + X to exit, and choose whether to save or not. Beware, what you do here can break the system" 0 0
+        dialog  --title "System Management - Sudoers File Config" --msgbox "This will launch visudo using the nano editor, press CTRL + X to exit, and choose whether to save or not. Beware, what you do here can break the system!" 0 0
         EDITOR=/usr/bin/nano visudo
       fi
       if [ "$option" == 3 ]; then
