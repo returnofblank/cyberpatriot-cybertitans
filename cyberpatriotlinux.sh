@@ -449,6 +449,7 @@ while true; do
         echo "net.ipv4.conf.default.log_martians=1" >> /etc/sysctl.d/99-custom.conf
         echo "net.ipv4.conf.all.rp_filter = 1" >> /etc/sysctl.d/99-custom.conf
         echo "net.ipv4.conf.all.send_redirects = 0" >> /etc/sysctl.d/99-custom.conf
+        echo "kernel.exec-shield = 1" >> /etc/sysctl.d/99-custom.conf
         dialog  --title "System Management - Kernel Security Measures" --msgbox "Implemented various kernel tweaks!" 0 0
         sysctl -p /etc/sysctl.d/99-custom.conf
       fi
