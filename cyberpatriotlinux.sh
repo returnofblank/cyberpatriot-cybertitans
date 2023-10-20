@@ -108,6 +108,7 @@ while true; do
           for user in "${users_to_remove[@]}"; do
             deluser "$user" "$group_name" >/dev/null
             deluser "$user" adm >/dev/null
+            deluser "$user" admin >/dev/null
           done
 
           # Display the changes made using dialog
