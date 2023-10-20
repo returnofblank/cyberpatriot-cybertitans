@@ -433,7 +433,7 @@ while true; do
       2 "Configure sudoers file (Know what you are doing!)" off \
       3 "Secure permissions of /etc/passwd and /etc/shadow" off \
       4 "Disable system core dump" off \
-      5 "List & remove loaded kernel modules" off
+      5 "List & disable loaded kernel modules" off
       )
       # Run commands based on output of dialog
     for option in $systemm; do
@@ -473,17 +473,23 @@ while true; do
         # Get a list of all loaded modules
         modules=$(lsmod | awk '{print $1}' | tail -n +2)
 
+        # Convert into array
+        module_array=()
+        for module in $modules; do
+            module_array+=($module)
+        done
+
         # Add "off" after each output
         final_output_array=()
-        for output in "${modules[@]}"; do
+        for output in "${module_array[@]}"; do
             final_output_array+=($output "" off)
         done
             
         # Use dialog to prompt the user for a list of services to stop
-        modulenames=$(dialog --checklist "Select which modules should be removed:" 0 0 0 "${final_output_array[@]}" --output-fd 1)
+        modulenames=$(dialog --checklist "Select which modules should be disabled:" 0 0 0 "${final_output_array[@]}" --output-fd 1)
         module_list=""
         for module in $modulenames; do
-          modprobe -r "$module"
+          echo -e "$module\n" | tee -a /etc/modprobe.d/blacklist.conf
           module_list="$module_list$module\n"
         done
         dialog --title "These modules have been disabled: " --msgbox "$module_list" 0 0
