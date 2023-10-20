@@ -430,7 +430,7 @@ while true; do
   system_management_menu () {
     systemm=$(dialog --checklist "Does general system management fixes that can't be classified as any of the other classifications:" 0 0 0 --output-fd 1 \
       1 "Configure secure kernel parameters" off \
-      2 "Configure sudoers file (Caution: Incorrect configuration can and will break your system!)" off \
+      2 "Configure sudoers file (Know what you are doing!)" off \
       3 "Secure permissions of /etc/passwd and /etc/shadow" off \
       4 "Disable system core dump" off \
       5 "List & remove loaded kernel modules" off
