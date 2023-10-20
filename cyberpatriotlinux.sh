@@ -39,7 +39,8 @@ while true; do
       3 "Remove unauthorized users" off \
       4 "Disable root login" off \
       5 "Enable password policy practices" off \
-      6 "Disable guest account, if present" off
+      6 "Disable guest account, if present" off \
+      7 "Enable various user settings" off
       )
     # Run commands based on output of dialog
     for option in $userm; do
@@ -149,17 +150,26 @@ while true; do
         dialog --title "User Management - Root Disabled" --msgbox "Login no longer enabled for Root user" 0 0
       fi
       if [ "$option" == 5 ]; then
-        echo -e "minlen = 14\nucredit = -1\nlcredit = -1\nocredit = -1\ndcredit = -1" >> /etc/security/pwquality.conf
-        sed -i '/pam_unix.so/ s/$/ remember=5 minlen=14/' /etc/pam.d/common-password
+        echo -e "minlen = 14\nucredit = -1\nlcredit = -1\nocredit = -1\ndcredit = -1\nusercheck=1" >> /etc/security/pwquality.conf
+        sed -i '/pam_unix.so/s/ sha.*//'
+        sed -i '/pam_unix.so/ s/$/ remember=5 minlen=14 sha512/' /etc/pam.d/common-password
         sed -i 's/PASS_MAX_DAYS.*/PASS_MAX_DAYS 90/' /etc/login.defs
         sed -i 's/PASS_MIN_DAYS.*/PASS_MIN_DAYS 10/' /etc/login.defs
         sed -i 's/PASS_WARN_AGE.*/PASS_WARN_AGE 7/' /etc/login.defs
-        # echo "auth required pam_tally2.so deny=5 onerr=fail unlock_time=1800" >> /etc/pam.d/common-auth #Pretty sure this borks the system
+        echo "auth    required    pam_faillock.so preauth audit silent deny=5 unlock_time=900" >> /etc/pam.d/common-auth
+        # echo "auth    required    pam_tally2.so deny=5 onerr=fail unlock_time=1800" >> /etc/pam.d/common-auth #Pretty sure this borks the system
         dialog --title "User Management - Password Policy" --msgbox "All passwords require 14 characters and require uppercase, lowercase, digits, and special characters" 0 0
       fi
       if [ "$option" == 6 ]; then
         echo "allow-guest=false" >> /etc/lightdm/lightdm.conf
         dialog --title "User Management - Guest Account" --msgbox "Guest account disabled, if present" 0 0
+      fi
+      if [ "$option" == 7 ]; then
+        sudo -u "$(logname)" gsettings set org.gnome.desktop.session idle-delay 300 2> /dev/null
+        sudo -u "$(logname)" xset s 300 2> /dev/null
+        sudo -u "$(logname)" gsettings get org.gnome.desktop.screensaver lock-enabled true
+        sudo -u "$(logname)" gsettings set org.gnome.desktop.screensaver lock-delay 0
+        dialog --title "User Management - Various Tweaks" --msgbox "Enabled various tweaks!" 0 0
       fi
     done
   }
@@ -256,7 +266,10 @@ while true; do
       2 "Don't permit root login for SSH Daemon" off \
       3 "Enable & start services" off \
       4 "Manage running processes" off \
-      5 "Manage start-up applications" off
+      5 "Manage start-up applications" off \
+      6 "Don't permit password login for SSH Daemon" off \
+      7 "Randomize port used for SSH Daemon" off \
+      8 "Enable AppArmor security module" off
       )
     # Run commands based on output of dialog
     for option in $servicem; do
@@ -308,12 +321,38 @@ while true; do
         apt -y install htop >/dev/null
         htop
       fi
-    done
-      if [ "$option" == 3 ]; then
+      if [ "$option" == 5 ]; then
         dialog --title "Service Operations - Boot-Up Manager" --msgbox "This will launch stacer, a utility for managing boot-up applications, once you are finished, you can close the program to exit." 0 0
         apt -y install stacer
         stacer
       fi
+      if [ "$option" == 6 ]; then
+        sed -i 's/^\(PasswordAuthentication\) yes$/\1 no/' /etc/ssh/sshd_config
+        systemctl restart sshd.service
+        dialog --title "Service Operations - SSHD Password Authentication" --msgbox "Passwords disabled for SSH Daemon! SSH keys must now be used to connect." 0 0
+      fi
+      if [ "$option" == 7 ]; then
+        # Define the valid range of SSH ports
+        MIN_PORT=1024
+        MAX_PORT=49151
+
+        # Generate a random port within the valid range
+        RANDOM_PORT=$(shuf -i $MIN_PORT-$MAX_PORT -n 1)
+
+        # Set the new SSH port in the configuration file
+        sed -i "s/^\(Port\) [0-9]\+$/\1 $RANDOM_PORT/" "/etc/ssh/sshd_config"
+
+        # Restart the SSH server to apply the new port
+        systemctl restart ssh
+
+        dialog --title "Service Operations - SSHD Port Randomization" --msgbox "New SSHD port is $RANDOM_PORT" 0 0
+      fi
+      if [ "$option" == 8 ]; then
+        systemctl enable apparmor.service >/dev/null
+        systemctl start apparmor.service >/dev/null
+        dialog --title "Service Operations - Enable & Start AppArmor" --msgbox "App Armor is now enabled!" 0 0
+      fi
+    done
   }
   malware_management_menu () {
       malwarem=$(dialog --checklist "Select what malware management you want done: " 0 0 0 --output-fd 1 \
@@ -358,9 +397,10 @@ while true; do
   information_management_menu () {
     infom=$(dialog --checklist "This compiles various information about the system to assist in manual interventions. This is usually items that can't be automated or isn't safe to do so: " 0 0 0 --output-fd 1 \
       1 "List all files/directories with an attribute" off \
-      #2 "unfilled" off \
-      #3 "unfilled" off \
-      #4 "unfilled" off
+      2 "List potential unauthorized files in /home" off \
+      3 "List contents of /etc/grub.d/40_custom to check for malicious options" off \
+      4 "List files with a SUID or GUID permission value set to it" off \
+      5 "List contents of /etc/hosts file to find potentially harmful DNS redirects" off
       )
     for option in $infom; do
       if [ "$option" == 1 ]; then
@@ -368,15 +408,93 @@ while true; do
         attributels=$(find /home /etc -type f -exec lsattr {} \; | grep -v -e "--------------e-------" | grep -v -e "----------------------")
         dialog --title "Files with attributes in /etc or /home" --msgbox "$attributels" 0 0
       fi
-      #if [ "$option" == 2 ]; then
+      if [ "$option" == 2 ]; then
+        dialog  --infobox "Searching /home directories for potentially unauthorized files..." 0 0
+        filels=$(find /home -type f \( -name "*.mp3" -o -name "*.png" -o -name "*.mp4" -o -name "*.mkv" -o -name "*.webm" -o -name "*.webp" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.avi" -o -name "*.flv" -o -name "*.mov" -o -name "*.wmv" -o -name "*.m4v" \))
+        dialog --title "Found these potentially unauthorized files!" --msgbox "$filels" 0 0
+      fi
+      if [ "$option" == 3 ]; then
+        dialog --title "Information - List Contents of Grub File" --msgbox "This will open up a file with the 'less' command, press 'q' to exit from 'less'" 0 0
+        less /etc/grub.d/40_custom
+      fi
+      if [ "$option" == 4 ]; then
+        suidguid=$(find / -type f \( -perm /4000 -o -perm /2000 \) -exec stat -c "%A %U %n" {} \;)
+        dialog --title "Found these files with a SUID/GUID permission set to it" --msgbox "$suidguid" 0 0
+      fi
+      if [ "$option" == 5 ]; then
+        dialog --title "Information - List Contents of /etc/hosts" --msgbox "This will open up a file with the 'less' command, press 'q' to exit from 'less'" 0 0
+        less /etc/hosts
+      fi
+    done
+  }
+  system_management_menu () {
+    systemm=$(dialog --checklist "Does general system management fixes that can't be classified as any of the other classifications:" 0 0 0 --output-fd 1 \
+      1 "Configure secure kernel parameters" off \
+      2 "Configure sudoers file (Know what you are doing!)" off \
+      3 "Secure permissions of /etc/passwd and /etc/shadow" off \
+      4 "Disable system core dump" off \
+      5 "List & disable loaded kernel modules" off
+      )
+      # Run commands based on output of dialog
+    for option in $systemm; do
+      if [ "$option" == 1 ]; then
+        touch /etc/sysctl.d/99-custom.conf
+        echo "net.ipv4.tcp_syncookies = 1" >> /etc/sysctl.d/99-custom.conf
+        echo "net.ipv4.tcp_rfc1337 = 1" >> /etc/sysctl.d/99-custom.conf
+        echo "net.ipv4.ip_forward = 0" >> /etc/sysctl.d/99-custom.conf
+        echo "net.ipv4.conf.all.accept_source_route=0" >> /etc/sysctl.d/99-custom.conf
+        echo "net.ipv4.conf.all.accept_redirects=0" >> /etc/sysctl.d/99-custom.conf
+        echo "net.ipv4.conf.default.accept_redirects=0" >> /etc/sysctl.d/99-custom.conf
+        echo "net.ipv4.conf.all.log_martians=1 " >> /etc/sysctl.d/99-custom.conf
+        echo "net.ipv4.conf.default.log_martians=1" >> /etc/sysctl.d/99-custom.conf
+        echo "net.ipv4.conf.all.rp_filter = 1" >> /etc/sysctl.d/99-custom.conf
+        echo "net.ipv4.conf.all.send_redirects = 0" >> /etc/sysctl.d/99-custom.conf
+        echo "kernel.exec-shield = 1" >> /etc/sysctl.d/99-custom.conf
+        dialog  --title "System Management - Kernel Security Measures" --msgbox "Implemented various kernel tweaks!" 0 0
+        sysctl -p /etc/sysctl.d/99-custom.conf
+      fi
+      if [ "$option" == 2 ]; then
+        dialog  --title "System Management - Sudoers File Config" --msgbox "This will launch visudo using the nano editor config, press CTRL + X to exit, and choose whether to save or not. Beware, what you do here can break the system" 0 0
+        EDITOR=/usr/bin/nano visudo
+      fi
+      if [ "$option" == 3 ]; then
+        chmod 644 /etc/passwd
+        chmod 640 /etc/shadow
+        dialog  --title "System Management - Permissions Config" --msgbox "Changed /etc/passwd to use 644 permissions, /etc/shadow to use 640 permissions" 0 0
+      fi
+      if [ "$option" == 4 ]; then
+        echo '* hard core 0' >> /etc/security/limits.conf
+        echo '* soft core 0' >> /etc/security/limits.conf
+        touch /etc/sysctl.d/9999-disable-core-dump.conf
+        echo "fs.suid_dumpable=0" >> /etc/sysctl.d/9999-disable-core-dump.conf
+        echo "kernel.core_pattern=|/bin/false" >> /etc/sysctl.d/9999-disable-core-dump.conf
+        sysctl -p /etc/sysctl.d/9999-disable-core-dump.conf
+      fi
+      if [ "$option" == 5 ]; then
+        # Get a list of all loaded modules
+        modules=$(lsmod | awk '{print $1}' | tail -n +2)
 
-      #fi
-      #if [ "$option" == 3 ]; then
+        # Convert into array
+        module_array=()
+        for module in $modules; do
+            module_array+=($module)
+        done
 
-      #fi
-      #if [ "$option" == 4 ]; then
-
-      #fi
+        # Add "off" after each output
+        final_output_array=()
+        for output in "${module_array[@]}"; do
+            final_output_array+=($output "" off)
+        done
+            
+        # Use dialog to prompt the user for a list of services to stop
+        modulenames=$(dialog --checklist "Select which modules should be disabled:" 0 0 0 "${final_output_array[@]}" --output-fd 1)
+        module_list=""
+        for module in $modulenames; do
+          echo -e "$module\n" | tee -a /etc/modprobe.d/blacklist.conf
+          module_list="$module_list$module\n"
+        done
+        dialog --title "These modules have been disabled: " --msgbox "$module_list" 0 0
+      fi
     done
   }
   mainmenu=$(dialog --menu "Choose a category: " 0 0 0 --output-fd 1 \
@@ -386,7 +504,8 @@ while true; do
     4 "Service Management" \
     5 "Malware Checks" \
     6 "Information" \
-    7 "Finished (Close Prompt)"
+    7 "System Management" \
+    8 "Finished (Close Prompt)"
   )
   if [ $? -ne 0 ]; then
         clear && break
@@ -398,6 +517,7 @@ while true; do
     4) service_management_menu ;;
     5) malware_management_menu ;;
     6) information_management_menu ;;
-    7) clear && exit 0 ;;
+    7) system_management_menu ;;
+    8) clear && exit 0 ;;
   esac
 done
