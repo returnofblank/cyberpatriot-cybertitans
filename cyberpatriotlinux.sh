@@ -486,7 +486,7 @@ while true; do
           modprobe -r "$module"
           module_list="$module_list$module\n"
         done
-        dialog --title "System Management - Disable Modules" --msgbox "$module_list" 0 0
+        dialog --title "These modules have been disabled: " --msgbox "$module_list" 0 0
       fi
     done
   }
