@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ "$EUID" -ne 0 ]]; then
+  echo "This script is running without root privileges, which is not possible. Exiting"
+  exit 0
+fi
+
 # Package name to check
 PACKAGE_NAME="dialog"
 
@@ -8,11 +13,6 @@ dpkg --get-selections | grep -q $PACKAGE_NAME > /dev/null
 if [[ $? -ne 0 ]]; then
   echo "The package $PACKAGE_NAME is not installed."
   sudo apt -y install $PACKAGE_NAME
-fi
-
-if [[ "$EUID" -ne 0 ]]; then
-  echo "This script is running without root privileges, which is not possible. Exiting"
-  exit 0
 fi
 
 dialog --msgbox "This is not a comprehensive utility; many operations will still have to be done manually!" 0 0
