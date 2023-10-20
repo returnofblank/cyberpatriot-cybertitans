@@ -345,7 +345,7 @@ while true; do
         # Restart the SSH server to apply the new port
         systemctl restart ssh
 
-        dialog --title "Service Operations - SSHD Port Randomization" --msgbox "New SSHD port is $RANDOM_PORT: " 0 0
+        dialog --title "Service Operations - SSHD Port Randomization" --msgbox "New SSHD port is $RANDOM_PORT" 0 0
       fi
       if [ "$option" == 8 ]; then
         systemctl enable apparmor.service >/dev/null
