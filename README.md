@@ -11,4 +11,6 @@ Debian/Ubuntu script - A Text-User Interface meant to guide you through some of 
   + Allow removal of attributes through TUI
   + Make code more efficient (It's fine as is, but repeated opening of files through redirects is a little inefficient)
 
+
+
 Windows 10 script - Powershell script that sets various secure policies throughout the system
