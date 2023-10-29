@@ -403,8 +403,8 @@ while true; do
       #fi
     done
   }
-  information_management_menu () {
-    infom=$(dialog --checklist "This compiles various information about the system to assist in manual interventions. This is usually items that can't be automated or isn't safe to do so: " 0 0 0 --output-fd 1 \
+  misc_management_menu () {
+    infom=$(dialog --checklist "Various micellaneous options that doesn't fit with any of the other categories, or sometimes may not help gain points: " 0 0 0 --output-fd 1 \
       1 "List all files/directories with an attribute" off \
       2 "List potential unauthorized files in /home" off \
       3 "List contents of /etc/grub.d/40_custom to check for malicious options" off \
@@ -512,7 +512,7 @@ while true; do
     3 "Firewall" \
     4 "Service Management" \
     5 "Malware Checks" \
-    6 "Information" \
+    6 "Miscellaneous" \
     7 "System Management" \
     8 "Finished (Close Prompt)"
   )
@@ -525,7 +525,7 @@ while true; do
     3) firewall_management_menu ;;
     4) service_management_menu ;;
     5) malware_management_menu ;;
-    6) information_management_menu ;;
+    6) misc_management_menu ;;
     7) system_management_menu ;;
     8) clear && exit 0 ;;
   esac
