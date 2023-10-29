@@ -63,6 +63,8 @@ while true; do
 
             # Add the username and password pair to the password list
             password_list="$password_list$users:$password\n"
+            # Make a file with all the changed passwords (insecure but whatever, this is not meant to run outside of Cyber Patriot)
+            echo -e "$password_list$users:$password\n" >> ./changedpasswords.txt
         done
         # Display the password list in a single msgbox
         dialog --title "New Passwords for Admins" --msgbox "$password_list" 0 0
