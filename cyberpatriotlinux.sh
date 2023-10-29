@@ -330,10 +330,8 @@ while true; do
         stacer
       fi
       if [ "$option" == 6 ]; then
-        # sed -i 's/^\(PasswordAuthentication\) yes$/\1 no/' /etc/ssh/sshd_config
         echo "ChallengeResponseAuthentication no" >> /etc/ssh/sshd_config
         echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
-        # echo "UsePAM no" >> /etc/ssh/sshd_config
         systemctl restart sshd.service
         systemctl restart ssh.service
         dialog --title "Service Operations - SSHD Password Authentication" --msgbox "Passwords disabled for SSH Daemon! SSH keys must now be used to connect." 0 0
@@ -347,7 +345,6 @@ while true; do
         RANDOM_PORT=$(shuf -i $MIN_PORT-$MAX_PORT -n 1)
 
         # Set the new SSH port in the configuration file
-        # sed -i "s/^\(Port\) [0-9]\+$/\1 $RANDOM_PORT/" "/etc/ssh/sshd_config"
         echo "Port $RANDOM_PORT" >> /etc/ssh/sshd_config
 
         # Restart the SSH server to apply the new port
