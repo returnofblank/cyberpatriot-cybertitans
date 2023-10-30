@@ -483,7 +483,25 @@ misc_management_menu () {
     if [ "$option" == 1 ]; then
       dialog  --infobox "Searching /etc and /home directories for files with attributes..." 0 0
       attributels=$(find /home /etc -type f -exec lsattr {} \; | grep -v -e "--------------e-------" | grep -v -e "----------------------")
-      dialog --title "Files with attributes in /etc or /home" --msgbox "$attributels" 0 0
+      file_array=()
+      for file in $attributels; do
+          file_array+=("$user")
+      done
+
+      # Add "off" after each file
+      final_file_array=()
+      for file in "${file_array[@]}"; do
+          final_file_array+=("$file" "" off)
+      done
+
+      # Use dialog to prompt the user for a list of files to remove attributes
+      filenames=$(dialog --title "Misc - Remove Attributes" --checklist "Select files from which to remove the special attributes:" 0 0 0 "${final_file_array[@]}" --output-fd 1)
+      file_list=""
+      for file in $filenames; do
+        deluser "$user" >/dev/null
+        file_list="$file_list$file\n"
+      done
+      dialog --title "Misc - Removed Attributes From These Files" --msgbox "$file_list" 0 0
     fi
     if [ "$option" == 2 ]; then
       dialog  --infobox "Searching /home directories for potentially unauthorized files..." 0 0
