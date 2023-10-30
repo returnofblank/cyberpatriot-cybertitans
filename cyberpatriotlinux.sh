@@ -540,8 +540,31 @@ misc_management_menu () {
       nano /etc/grub.d/40_custom
     fi
     if [ "$option" == 4 ]; then
-      suidguid=$(find / -type f \( -perm /4000 -o -perm /2000 \) -exec stat -c "%A %U %n" {} \;)
-      dialog --title "Found these files with a SUID/GUID permission set to it" --msgbox "$suidguid" 0 0
+      suidguid=$(find / -type f \( -perm /4000 -o -perm /2000 \) -exec stat -c "%A %U %n" {} \; | awk '{print $3}')
+
+      # Convert the id list into an array
+      suguid_array=()
+      for perm in $suidguid; do
+          suguid_array+=($perm)
+      done
+      if [ "$suguid_array" == "" ]; then
+        dialog --title "Misc - SUID/GUID Permissions" --msgbox "No files found with a SUID/GUID Permission" 0 0
+      else
+        # Add "off" after each file location
+        final_suguid_array=()
+        for perm in "${suguid_array[@]}"; do
+            final_suguid_array+=("$perm" "" off)
+        done
+
+        # Use dialog to prompt the user for a list of files TO DELETE!!!
+        suguidinput=$(dialog --title "Misc - SUID/GUID Permissions" --checklist "Found these files with a SUID/GUID Permission - Select which files should be cleared of these:" 0 0 0 "${final_suguid_array[@]}" --output-fd 1)
+        suguid_list=""
+        for perm in $suguidinput; do
+          chmod u-s,g-s "$perm" >/dev/null
+          suguid_list="$suguid_list$perm\n"
+        done
+        dialog --title "Misc - Removed SUID/GUID Permissions" --msgbox "$suguid_list" 0 0
+      fi
     fi
     if [ "$option" == 5 ]; then
       dialog --title "Information - List Contents of /etc/hosts" --msgbox "This will launch visudo using the nano editor, press CTRL + X to exit, and choose whether to save or not. Beware, what you do here can break the system!" 0 0
