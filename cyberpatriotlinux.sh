@@ -491,12 +491,11 @@ misc_management_menu () {
           file=$(echo "$line" | awk '{$1=""; print $0}' | sed 's/^ *//g')  # Remove leading spaces after removing the first field
           combined="$attributes $file"
           # Ensure each entry in the array is a separate argument
-          file_array+=("$combined" "off")
+          file_array+=("$combined" "" "off")
       done <<< "$attributels"
 
       # Use dialog to prompt the user for a list of files to remove attributes
       filenames=$(dialog --title "Misc - Remove Attributes" --checklist "Select files from which to remove the file attributes:" 0 0 0 "${file_array[@]}" --output-fd 1)
-
       file_list=""
       for entry in $filenames; do
           # Extract the file path by removing the attributes (everything up to the first space)
