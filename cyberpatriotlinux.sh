@@ -491,7 +491,7 @@ misc_management_menu () {
           file=$(echo "$line" | awk '{$1=""; print $0}' | sed 's/^ *//g')  # Remove leading spaces after removing the first field
           combined="$attributes $file"
           # Ensure each entry in the array is a separate argument
-          file_array+=("$file" "$combined" "off")
+          file_array+=("$combined" "off")
       done <<< "$attributels"
 
       # Use dialog to prompt the user for a list of files to remove attributes
