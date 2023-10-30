@@ -536,7 +536,7 @@ misc_management_menu () {
       fi
     fi
     if [ "$option" == 3 ]; then
-      dialog --title "Information - List Contents of Grub File" --msgbox "This will launch visudo using the nano editor, press CTRL + X to exit, and choose whether to save or not. Beware, what you do here can break the system!" 0 0
+      dialog --title "Information - List Contents of Grub File" --msgbox "This will launch the nano editor, press CTRL + X to exit, and choose whether to save or not. Beware, what you do here can break the system!" 0 0
       nano /etc/grub.d/40_custom
     fi
     if [ "$option" == 4 ]; then
