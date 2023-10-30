@@ -39,7 +39,7 @@ user_management_menu() {
     4 "Disable root login" off \
     5 "Enable password policy practices" off \
     6 "Disable guest account, if present" off \
-    7 "Enable various user settings" off
+    7 "Enable screen-lock for current user" off
     )
   # Run commands based on output of dialog
   for option in $userm; do
@@ -407,7 +407,7 @@ system_management_menu () {
     4 "Disable system core dump" off \
     5 "List & disable loaded kernel modules" off
     )
-    # Run commands based on output of dialog
+  # Run commands based on output of dialog
   for option in $systemm; do
     if [ "$option" == 1 ]; then
       touch /etc/sysctl.d/99-custom.conf
