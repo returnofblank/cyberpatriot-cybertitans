@@ -473,7 +473,7 @@ system_management_menu () {
 }
 misc_management_menu () {
   infom=$(dialog --checklist "Various micellaneous options that doesn't fit with any of the other categories, or sometimes may not help gain points: " 0 0 0 --output-fd 1 \
-    1 "List all files/directories with a file attribute" off \
+    1 "List all files/directories with a file attribute and remove the attributes" off \
     2 "List potential unauthorized files in /home" off \
     3 "List contents of /etc/grub.d/40_custom to check for malicious options" off \
     4 "List files with a SUID or GUID permission value set to it" off \
