@@ -473,8 +473,8 @@ system_management_menu () {
 }
 misc_management_menu () {
   infom=$(dialog --checklist "Various micellaneous options that doesn't fit with any of the other categories, or sometimes may not help gain points: " 0 0 0 --output-fd 1 \
-    1 "List all files/directories with a file attribute and remove the attributes" off \
-    2 "List potential unauthorized files in /home" off \
+    1 "List all files/directories with an attribute and remove the attributes" off \
+    2 "List and remove potential unauthorized files in /home" off \
     3 "List contents of /etc/grub.d/40_custom to check for malicious options" off \
     4 "List files with a SUID or GUID permission value set to it" off \
     5 "List contents of /etc/hosts file to find potentially harmful DNS redirects" off
@@ -483,32 +483,57 @@ misc_management_menu () {
     if [ "$option" == 1 ]; then
       dialog  --infobox "Searching /etc and /home directories for files with attributes..." 0 0
       attributels=$(find /home /etc -type f -exec lsattr {} \; | grep -v -e "--------------e-------" | grep -v -e "----------------------")
+      if [ "$attributels" == "" ]; then
+        dialog --title "Misc - Files With Attributes" --msgbox "No files with attributes found" 0 0
+      else
+        file_array=()
+        while IFS= read -r line; do
+            # Split the line into attributes and filename
+            attributes=$(echo "$line" | awk '{print $1}')
+            file=$(echo "$line" | awk '{$1=""; print $0}' | sed 's/^ *//g')  # Remove leading spaces after removing the first field
+            combined="$attributes $file"
+            # Ensure each entry in the array is a separate argument
+            file_array+=("$combined" "" "off")
+        done <<< "$attributels"
 
-      file_array=()
-      while IFS= read -r line; do
-          # Split the line into attributes and filename
-          attributes=$(echo "$line" | awk '{print $1}')
-          file=$(echo "$line" | awk '{$1=""; print $0}' | sed 's/^ *//g')  # Remove leading spaces after removing the first field
-          combined="$attributes $file"
-          # Ensure each entry in the array is a separate argument
-          file_array+=("$combined" "" "off")
-      done <<< "$attributels"
-
-      # Use dialog to prompt the user for a list of files to remove attributes
-      IFS=$'\n' filenames=($(dialog --title "Misc - Remove Attributes" --checklist "Select files from which to remove the file attributes:" 0 0 0 "${file_array[@]}" --output-fd 1))
-      file_list=""
-      for entry in $filenames; do
-          # Extract the file path by removing the attributes (everything up to the first space)
-          file_path=$(echo "$entry" | sed 's/^[^ ]* //' | tr -d '"')
-          chattr -aAcCdDeijPsStTu "$file_path"
-          file_list+="$file_path\n"
-      done
-      dialog --title "Misc - Removed Attributes From These Files" --msgbox "$file_list" 0 0
+        # Use dialog to prompt the user for a list of files to remove attributes
+        IFS=$'\n' filenames=($(dialog --title "Misc - Remove Attributes" --checklist "Select files from which to remove the file attributes:" 0 0 0 "${file_array[@]}" --output-fd 1))
+        file_list=""
+        for entry in $filenames; do
+            # Extract the file path by removing the attributes (everything up to the first space)
+            file_path=$(echo "$entry" | sed 's/^[^ ]* //' | tr -d '"')
+            chattr -aAcCdDeijPsStTu "$file_path"
+            file_list+="$file_path\n"
+        done
+        dialog --title "Misc - Removed Attributes From These Files" --msgbox "$file_list" 0 0
+      fi
     fi
     if [ "$option" == 2 ]; then
       dialog  --infobox "Searching /home directories for potentially unauthorized files..." 0 0
       filels=$(find /home -type f \( -name "*.mp3" -o -name "*.png" -o -name "*.mp4" -o -name "*.mkv" -o -name "*.webm" -o -name "*.webp" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.avi" -o -name "*.flv" -o -name "*.mov" -o -name "*.wmv" -o -name "*.m4v" \))
-      dialog --title "Found these potentially unauthorized files!" --msgbox "$filels" 0 0
+      # Convert the file list into an array
+      file_array=()
+      for file in $filels; do
+          file_array+=($file)
+      done
+      if [ "$file_array" == "" ]; then
+        dialog --title "Misc - Unauthorized Files" --msgbox "No unauthorized files found" 0 0
+      else
+        # Add "off" after each file location
+        final_file_array=()
+        for file in "${file_array[@]}"; do
+            final_file_array+=("$file" "" off)
+        done
+
+        # Use dialog to prompt the user for a list of files TO DELETE!!!
+        filelocations=$(dialog --title "Misc - Delete Files" --checklist "Found these potentially unauthorized files - Select which files should be deleted:" 0 0 0 "${final_file_array[@]}" --output-fd 1)
+        file_list=""
+        for file in $filelocations; do
+          rm -f "$file" >/dev/null
+          file_list="$file_list$file\n"
+        done
+        dialog --title "User Management - Deleted files" --msgbox "$file_list" 0 0
+      fi
     fi
     if [ "$option" == 3 ]; then
       dialog --title "Information - List Contents of Grub File" --msgbox "This will launch visudo using the nano editor, press CTRL + X to exit, and choose whether to save or not. Beware, what you do here can break the system!" 0 0
