@@ -399,41 +399,8 @@ malware_management_menu () {
     #fi
   done
 }
-misc_management_menu () {
-  infom=$(dialog --checklist "Various micellaneous options that doesn't fit with any of the other categories, or sometimes may not help gain points: " 0 0 0 --output-fd 1 \
-    1 "List all files/directories with an attribute" off \
-    2 "List potential unauthorized files in /home" off \
-    3 "List contents of /etc/grub.d/40_custom to check for malicious options" off \
-    4 "List files with a SUID or GUID permission value set to it" off \
-    5 "List contents of /etc/hosts file to find potentially harmful DNS redirects" off
-    )
-  for option in $infom; do
-    if [ "$option" == 1 ]; then
-      dialog  --infobox "Searching /etc and /home directories for files with attributes..." 0 0
-      attributels=$(find /home /etc -type f -exec lsattr {} \; | grep -v -e "--------------e-------" | grep -v -e "----------------------")
-      dialog --title "Files with attributes in /etc or /home" --msgbox "$attributels" 0 0
-    fi
-    if [ "$option" == 2 ]; then
-      dialog  --infobox "Searching /home directories for potentially unauthorized files..." 0 0
-      filels=$(find /home -type f \( -name "*.mp3" -o -name "*.png" -o -name "*.mp4" -o -name "*.mkv" -o -name "*.webm" -o -name "*.webp" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.avi" -o -name "*.flv" -o -name "*.mov" -o -name "*.wmv" -o -name "*.m4v" \))
-      dialog --title "Found these potentially unauthorized files!" --msgbox "$filels" 0 0
-    fi
-    if [ "$option" == 3 ]; then
-      dialog --title "Information - List Contents of Grub File" --msgbox "This will launch visudo using the nano editor, press CTRL + X to exit, and choose whether to save or not. Beware, what you do here can break the system!" 0 0
-      nano /etc/grub.d/40_custom
-    fi
-    if [ "$option" == 4 ]; then
-      suidguid=$(find / -type f \( -perm /4000 -o -perm /2000 \) -exec stat -c "%A %U %n" {} \;)
-      dialog --title "Found these files with a SUID/GUID permission set to it" --msgbox "$suidguid" 0 0
-    fi
-    if [ "$option" == 5 ]; then
-      dialog --title "Information - List Contents of /etc/hosts" --msgbox "This will launch visudo using the nano editor, press CTRL + X to exit, and choose whether to save or not. Beware, what you do here can break the system!" 0 0
-      nano /etc/hosts
-    fi
-  done
-}
 system_management_menu () {
-  systemm=$(dialog --checklist "Does general system management fixes that can't be classified as any of the other classifications:" 0 0 0 --output-fd 1 \
+  systemm=$(dialog --checklist "Does general system management fixes:" 0 0 0 --output-fd 1 \
     1 "Configure secure kernel parameters" off \
     2 "Configure sudoers file (Know what you are doing!)" off \
     3 "Secure permissions of /etc/passwd and /etc/shadow" off \
@@ -444,17 +411,19 @@ system_management_menu () {
   for option in $systemm; do
     if [ "$option" == 1 ]; then
       touch /etc/sysctl.d/99-custom.conf
-      echo "net.ipv4.tcp_syncookies = 1" >> /etc/sysctl.d/99-custom.conf
-      echo "net.ipv4.tcp_rfc1337 = 1" >> /etc/sysctl.d/99-custom.conf
-      echo "net.ipv4.ip_forward = 0" >> /etc/sysctl.d/99-custom.conf
-      echo "net.ipv4.conf.all.accept_source_route=0" >> /etc/sysctl.d/99-custom.conf
-      echo "net.ipv4.conf.all.accept_redirects=0" >> /etc/sysctl.d/99-custom.conf
-      echo "net.ipv4.conf.default.accept_redirects=0" >> /etc/sysctl.d/99-custom.conf
-      echo "net.ipv4.conf.all.log_martians=1 " >> /etc/sysctl.d/99-custom.conf
-      echo "net.ipv4.conf.default.log_martians=1" >> /etc/sysctl.d/99-custom.conf
-      echo "net.ipv4.conf.all.rp_filter = 1" >> /etc/sysctl.d/99-custom.conf
-      echo "net.ipv4.conf.all.send_redirects = 0" >> /etc/sysctl.d/99-custom.conf
-      echo "kernel.exec-shield = 1" >> /etc/sysctl.d/99-custom.conf
+      {
+        echo "net.ipv4.tcp_syncookies = 1"
+        echo "net.ipv4.tcp_rfc1337 = 1"
+        echo "net.ipv4.ip_forward = 0"
+        echo "net.ipv4.conf.all.accept_source_route=0"
+        echo "net.ipv4.conf.all.accept_redirects=0"
+        echo "net.ipv4.conf.default.accept_redirects=0"
+        echo "net.ipv4.conf.all.log_martians=1 "
+        echo "net.ipv4.conf.default.log_martians=1"
+        echo "net.ipv4.conf.all.rp_filter = 1"
+        echo "net.ipv4.conf.all.send_redirects = 0"
+        echo "kernel.exec-shield = 1"
+      } >> /etc/sysctl.d/99-custom.conf
       dialog  --title "System Management - Kernel Security Measures" --msgbox "Implemented various kernel tweaks!" 0 0
       sysctl -p /etc/sysctl.d/99-custom.conf
     fi
@@ -502,6 +471,39 @@ system_management_menu () {
     fi
   done
 }
+misc_management_menu () {
+  infom=$(dialog --checklist "Various micellaneous options that doesn't fit with any of the other categories, or sometimes may not help gain points: " 0 0 0 --output-fd 1 \
+    1 "List all files/directories with an attribute" off \
+    2 "List potential unauthorized files in /home" off \
+    3 "List contents of /etc/grub.d/40_custom to check for malicious options" off \
+    4 "List files with a SUID or GUID permission value set to it" off \
+    5 "List contents of /etc/hosts file to find potentially harmful DNS redirects" off
+    )
+  for option in $infom; do
+    if [ "$option" == 1 ]; then
+      dialog  --infobox "Searching /etc and /home directories for files with attributes..." 0 0
+      attributels=$(find /home /etc -type f -exec lsattr {} \; | grep -v -e "--------------e-------" | grep -v -e "----------------------")
+      dialog --title "Files with attributes in /etc or /home" --msgbox "$attributels" 0 0
+    fi
+    if [ "$option" == 2 ]; then
+      dialog  --infobox "Searching /home directories for potentially unauthorized files..." 0 0
+      filels=$(find /home -type f \( -name "*.mp3" -o -name "*.png" -o -name "*.mp4" -o -name "*.mkv" -o -name "*.webm" -o -name "*.webp" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.avi" -o -name "*.flv" -o -name "*.mov" -o -name "*.wmv" -o -name "*.m4v" \))
+      dialog --title "Found these potentially unauthorized files!" --msgbox "$filels" 0 0
+    fi
+    if [ "$option" == 3 ]; then
+      dialog --title "Information - List Contents of Grub File" --msgbox "This will launch visudo using the nano editor, press CTRL + X to exit, and choose whether to save or not. Beware, what you do here can break the system!" 0 0
+      nano /etc/grub.d/40_custom
+    fi
+    if [ "$option" == 4 ]; then
+      suidguid=$(find / -type f \( -perm /4000 -o -perm /2000 \) -exec stat -c "%A %U %n" {} \;)
+      dialog --title "Found these files with a SUID/GUID permission set to it" --msgbox "$suidguid" 0 0
+    fi
+    if [ "$option" == 5 ]; then
+      dialog --title "Information - List Contents of /etc/hosts" --msgbox "This will launch visudo using the nano editor, press CTRL + X to exit, and choose whether to save or not. Beware, what you do here can break the system!" 0 0
+      nano /etc/hosts
+    fi
+  done
+}
 
 while true; do      
   mainmenu=$(dialog --menu "Choose a category: " 0 0 0 --output-fd 1 \
@@ -510,8 +512,8 @@ while true; do
     3 "Firewall" \
     4 "Service Management" \
     5 "Malware Checks" \
-    6 "Miscellaneous" \
-    7 "System Management" \
+    6 "System Management" \
+    7 "Miscellaneous" \
     8 "Finished (Close Prompt)"
   )
   if [ $? -ne 0 ]; then
@@ -523,8 +525,8 @@ while true; do
     3) firewall_management_menu ;;
     4) service_management_menu ;;
     5) malware_management_menu ;;
-    6) misc_management_menu ;;
-    7) system_management_menu ;;
+    6) system_management_menu ;;
+    7) misc_management_menu ;;
     8) clear && exit 0 ;;
   esac
 done
