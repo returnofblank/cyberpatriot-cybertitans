@@ -473,7 +473,7 @@ system_management_menu () {
 }
 misc_management_menu () {
   infom=$(dialog --checklist "Various micellaneous options that doesn't fit with any of the other categories, or sometimes may not help gain points: " 0 0 0 --output-fd 1 \
-    1 "List all files/directories with an attribute" off \
+    1 "List all files/directories with a file attribute" off \
     2 "List potential unauthorized files in /home" off \
     3 "List contents of /etc/grub.d/40_custom to check for malicious options" off \
     4 "List files with a SUID or GUID permission value set to it" off \
@@ -483,23 +483,26 @@ misc_management_menu () {
     if [ "$option" == 1 ]; then
       dialog  --infobox "Searching /etc and /home directories for files with attributes..." 0 0
       attributels=$(find /home /etc -type f -exec lsattr {} \; | grep -v -e "--------------e-------" | grep -v -e "----------------------")
-      file_array=()
-      for file in $attributels; do
-          file_array+=("$user")
-      done
 
-      # Add "off" after each file
-      final_file_array=()
-      for file in "${file_array[@]}"; do
-          final_file_array+=("$file" "" off)
-      done
+      file_array=()
+      while IFS= read -r line; do
+          # Split the line into attributes and filename
+          attributes=$(echo "$line" | awk '{print $1}')
+          file=$(echo "$line" | awk '{$1=""; print $0}' | sed 's/^ *//g')  # Remove leading spaces after removing the first field
+          combined="$attributes $file"
+          # Ensure each entry in the array is a separate argument
+          file_array+=("$file" "$combined" "off")
+      done <<< "$attributels"
 
       # Use dialog to prompt the user for a list of files to remove attributes
-      filenames=$(dialog --title "Misc - Remove Attributes" --checklist "Select files from which to remove the special attributes:" 0 0 0 "${final_file_array[@]}" --output-fd 1)
+      filenames=$(dialog --title "Misc - Remove Attributes" --checklist "Select files from which to remove the file attributes:" 0 0 0 "${file_array[@]}" --output-fd 1)
+
       file_list=""
-      for file in $filenames; do
-        deluser "$user" >/dev/null
-        file_list="$file_list$file\n"
+      for entry in $filenames; do
+          # Extract the file path by removing the attributes (everything up to the first space)
+          file_path=$(echo "$entry" | sed 's/^[^ ]* //')
+          chattr -aAcCdDeijPsStTu "$file_path"
+          file_list+="$file_path\n"
       done
       dialog --title "Misc - Removed Attributes From These Files" --msgbox "$file_list" 0 0
     fi
