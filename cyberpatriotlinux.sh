@@ -495,11 +495,11 @@ misc_management_menu () {
       done <<< "$attributels"
 
       # Use dialog to prompt the user for a list of files to remove attributes
-      filenames=$(dialog --title "Misc - Remove Attributes" --checklist "Select files from which to remove the file attributes:" 0 0 0 "${file_array[@]}" --output-fd 1)
+      IFS=$'\n' filenames=($(dialog --title "Misc - Remove Attributes" --checklist "Select files from which to remove the file attributes:" 0 0 0 "${file_array[@]}" --output-fd 1))
       file_list=""
       for entry in $filenames; do
           # Extract the file path by removing the attributes (everything up to the first space)
-          file_path=$(echo "$entry" | sed 's/^[^ ]* //')
+          file_path=$(echo "$entry" | sed 's/^[^ ]* //' | tr -d '"')
           chattr -aAcCdDeijPsStTu "$file_path"
           file_list+="$file_path\n"
       done
