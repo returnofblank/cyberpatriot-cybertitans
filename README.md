@@ -9,3 +9,6 @@ Debian/Ubuntu script - A Text-User Interface meant to guide you through some of 
 
 
 Windows 10 script - Powershell script that sets various secure policies throughout the system
+
+**What needs to be complete**
+  + Nothing as of now
