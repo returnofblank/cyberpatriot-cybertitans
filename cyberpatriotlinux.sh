@@ -476,7 +476,7 @@ misc_management_menu () {
     1 "List all files/directories with an attribute and remove the attributes" off \
     2 "List and remove potential unauthorized files in /home" off \
     3 "List contents of /etc/grub.d/40_custom to check for malicious options" off \
-    4 "List files with a SUID or GUID permission value set to it" off \
+    4 "List files with a SUID or GUID permission value set to it and clear them" off \
     5 "List contents of /etc/hosts file to find potentially harmful DNS redirects" off
     )
   for option in $infom; do
