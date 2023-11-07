@@ -5,6 +5,12 @@ Debian/Ubuntu script - A Text-User Interface meant to guide you through some of 
 
 **What needs to be complete**
   + Implement the ability to search cron jobs
+  + Implement ability to read skel files
+  + Implement passwdqc PAM
+  + Implement ability to check for malicious repos
+  + Fix issues with "unauthorized files" part not displaying directories correctly
+  + Enable secure FTP settings
+  + Fix log changed passwords not saving correctly to text file
 
 
 
