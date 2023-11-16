@@ -11,6 +11,7 @@ Debian/Ubuntu script - A Text-User Interface meant to guide you through some of 
   + Fix issues with "unauthorized files" part not displaying directories correctly
   + Enable secure FTP settings
   + Fix log changed passwords not saving correctly to text file
+  + Use Xterm to output commands, better for debugging
 
 
 
