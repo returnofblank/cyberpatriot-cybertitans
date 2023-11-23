@@ -13,6 +13,7 @@ Debian/Ubuntu script - A Text-User Interface meant to guide you through some of 
   + Fix log changed passwords not saving correctly to text file
   + Use Xterm to output commands, better for debugging
   + List masked packages "apt-mark showhold"
+  + Consider listing users who UIDs are below 1000, rather than only those above 1000
 
 
 
