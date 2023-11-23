@@ -15,6 +15,7 @@ Debian/Ubuntu script - A Text-User Interface meant to guide you through some of 
   + List masked packages "apt-mark showhold"
   + Consider listing users who UIDs are below 1000, rather than only those above 1000
   + Implement sysctl good configs from this https://github.com/k4yt3x/sysctl
+  + Set grub encrypted password
 
 
 
