@@ -17,6 +17,7 @@ Debian/Ubuntu script - A Text-User Interface meant to guide you through some of 
   + Implement sysctl good configs from this https://github.com/k4yt3x/sysctl
   + Set grub encrypted password
   + Search for symbolic links
+  + Add minetest to unauthorized games
 
 
 
