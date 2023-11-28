@@ -18,6 +18,7 @@ Debian/Ubuntu script - A Text-User Interface meant to guide you through some of 
   + Set grub encrypted password
   + Search for symbolic links
   + Add minetest to unauthorized games
+  + Change apt upgrade command to use full-upgrade, as it will handle kernel upgrades and package conflicts
 
 
 
