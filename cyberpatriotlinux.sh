@@ -551,29 +551,28 @@ misc_management_menu () {
     )
   for option in $infom; do
     if [ "$option" == 1 ]; then
-      dialog  --infobox "Searching /etc and /home directories for files with attributes..." 0 0
-      attributels=$(find /home /etc -type f -exec lsattr {} \; | grep -v -e "--------------e-------" | grep -v -e "----------------------")
+      dialog  --infobox "Searching / directory for files with attributes..." 0 0
+      attributels=$(find / \( -path /proc -o -path /sys -o -path /dev -o -path /run -o -path /snap \) -prune -o -type f -exec lsattr {} \; | grep -v -e "--------------e-------" | grep -v -e "----------------------")
       if [ "$attributels" == "" ]; then
         dialog --title "Misc - Files With Attributes" --msgbox "No files with attributes found" 0 0
       else
         file_array=()
         while IFS= read -r line; do
-            # Split the line into attributes and filename
-            attributes=$(echo "$line" | awk '{print $1}')
-            file=$(echo "$line" | awk '{$1=""; print $0}' | sed 's/^ *//g')  # Remove leading spaces after removing the first field
-            combined="$attributes $file"
-            # Ensure each entry in the array is a separate argument
-            file_array+=("$combined" "" "off")
+          # Split the line into attributes and filename
+          attributes=$(echo "$line" | awk '{print $1}')
+          file=$(echo "$line" | awk '{$1=""; print $0}' | sed 's/^ *//g')  # Remove leading spaces after removing the first field
+          combined="$attributes $file"
+          # Ensure each entry in the array is a separate argument
+          file_array+=("$combined" "" "off")
         done <<< "$attributels"
 
         # Use dialog to prompt the user for a list of files to remove attributes
-        IFS=$'\n' filenames=($(dialog --title "Misc - Remove Attributes" --checklist "Select files from which to remove the file attributes:" 0 0 0 "${file_array[@]}" --output-fd 1))
+        filenames=($(dialog --title "Misc - Remove Attributes" --checklist "Select files from which to remove the file attributes:" 0 0 0 "${file_array[@]}" --output-fd 1))
         file_list=""
         for entry in $filenames; do
-            # Extract the file path by removing the attributes (everything up to the first space)
-            file_path=$(echo "$entry" | sed 's/^[^ ]* //' | tr -d '"')
-            chattr -aAcCdDeijPsStTu "$file_path"
-            file_list+="$file_path\n"
+          # Extract the file path by removing the attributes (everything up to the first space)
+          chattr -aAcCdDeijPsStTu "$file"
+          file_list+="$file_path\n"
         done
         dialog --title "Misc - Removed Attributes From These Files" --msgbox "$file_list" 0 0
       fi
