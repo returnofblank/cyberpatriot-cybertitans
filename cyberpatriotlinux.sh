@@ -15,6 +15,16 @@ if [[ $? -ne 0 ]]; then
   sudo apt -y install $PACKAGE_NAME
 fi
 
+# Package name to check
+PACKAGE_NAME="xterm"
+
+# Check if the package is installed
+dpkg --get-selections | grep -q $PACKAGE_NAME > /dev/null
+if [[ $? -ne 0 ]]; then
+  echo "The package $PACKAGE_NAME is not installed."
+  sudo apt -y install $PACKAGE_NAME
+fi
+
 #Enable distro agnostic identification of administrators
 if [[ -f /etc/os-release ]]; then
     source /etc/os-release
@@ -36,11 +46,11 @@ user_management_menu() {
     1 "Replace passwords of administrators" off \
     2 "Manage users with administrator privileges" off \
     3 "Remove unauthorized users" off \
-    4 "Disable root login" off \
-    5 "Enable password policy practices" off \
-    6 "Disable guest account, if present" off \
-    7 "Enable screen-lock for current user" off \
-    8 "Remove potentially hidden users" off
+    4 "Remove potentially hidden users" off
+    5 "Disable root login" off \
+    6 "Enable password policy practices" off \
+    7 "Disable guest account, if present" off \
+    8 "Enable screen-lock for current user" off
     )
   # Run commands based on output of dialog
   for option in $userm; do
@@ -121,12 +131,12 @@ user_management_menu() {
     fi
     if [ "$option" == 3 ]; then
       # Get a list of real users on the system
-        users=$(awk -F: '$3 >= 1000 && $1 != "'"$(logname)"'" && $1 != "nobody" { print $1 }' /etc/passwd)
+      users=$(awk -F: '$3 >= 1000 && $1 != "'"$(logname)"'" && $1 != "nobody" { print $1 }' /etc/passwd)
 
       # Convert the user list into an array
       user_array=()
       for user in $users; do
-          user_array+=($user)
+        user_array+=($user)
       done
 
       # Sort the user array
@@ -136,7 +146,7 @@ user_management_menu() {
       # Add "off" after each username
       final_user_array=()
       for user in "${sorted_user_array[@]}"; do
-          final_user_array+=($user "" off)
+        final_user_array+=($user "" off)
       done
 
       # Use dialog to prompt the user for a list of usernames TO DELETE!!!
@@ -149,38 +159,13 @@ user_management_menu() {
       dialog --title "User Management - Deleted users" --msgbox "$user_list" 0 0
     fi
     if [ "$option" == 4 ]; then
-      sed -i "/^root:/s:/bin/bash:/sbin/nologin:g" /etc/passwd
-      dialog --title "User Management - Root Disabled" --msgbox "Login no longer enabled for Root user" 0 0
-    fi
-    if [ "$option" == 5 ]; then
-      echo -e "minlen = 14\nucredit = -1\nlcredit = -1\nocredit = -1\ndcredit = -1\nusercheck=1" >> /etc/security/pwquality.conf
-      sed -i '/pam_unix.so/s/ sha.*//'
-      sed -i '/pam_unix.so/ s/$/ remember=5 minlen=14 sha512/' /etc/pam.d/common-password
-      sed -i 's/PASS_MAX_DAYS.*/PASS_MAX_DAYS 90/' /etc/login.defs
-      sed -i 's/PASS_MIN_DAYS.*/PASS_MIN_DAYS 10/' /etc/login.defs
-      sed -i 's/PASS_WARN_AGE.*/PASS_WARN_AGE 7/' /etc/login.defs
-      echo "auth    required    pam_faillock.so preauth audit silent deny=5 unlock_time=900" >> /etc/pam.d/common-auth
-      dialog --title "User Management - Password Policy" --msgbox "All passwords require 14 characters and require uppercase, lowercase, digits, and special characters" 0 0
-    fi
-    if [ "$option" == 6 ]; then
-      echo "allow-guest=false" >> /etc/lightdm/lightdm.conf
-      dialog --title "User Management - Guest Account" --msgbox "Guest account disabled, if present" 0 0
-    fi
-    if [ "$option" == 7 ]; then
-      sudo -u "$(logname)" gsettings set org.gnome.desktop.session idle-delay 300 2> /dev/null
-      sudo -u "$(logname)" xset s 300 2> /dev/null
-      sudo -u "$(logname)" gsettings get org.gnome.desktop.screensaver lock-enabled true
-      sudo -u "$(logname)" gsettings set org.gnome.desktop.screensaver lock-delay 0
-      dialog --title "User Management - Various Tweaks" --msgbox "Enabled various tweaks!" 0 0
-    fi
-    if [ "$option" == 8 ]; then
       # Get a list of real users on the system
       users=$(awk -F: '$3 < 1000 && $1 != "nobody" { print $1 }' /etc/passwd)
 
       # Convert the user list into an array
       user_array=()
       for user in $users; do
-          user_array+=($user)
+        user_array+=($user)
       done
 
       # Sort the user array
@@ -190,7 +175,7 @@ user_management_menu() {
       # Add "off" after each username
       final_user_array=()
       for user in "${sorted_user_array[@]}"; do
-          final_user_array+=($user "" off)
+        final_user_array+=($user "" off)
       done
 
       # Use dialog to prompt the user for a list of usernames TO DELETE!!!
@@ -204,6 +189,31 @@ user_management_menu() {
         user_list="$user_list$user\n"
       done
       dialog --title "User Management - Deleted users" --msgbox "$user_list" 0 0
+    fi
+    if [ "$option" == 5 ]; then
+      sed -i "/^root:/s:/bin/bash:/sbin/nologin:g" /etc/passwd
+      dialog --title "User Management - Root Disabled" --msgbox "Login no longer enabled for Root user" 0 0
+    fi
+    if [ "$option" == 6 ]; then
+      echo -e "minlen = 14\nucredit = -1\nlcredit = -1\nocredit = -1\ndcredit = -1\nusercheck=1" >> /etc/security/pwquality.conf
+      sed -i '/pam_unix.so/s/ sha.*//'
+      sed -i '/pam_unix.so/ s/$/ remember=5 minlen=14 sha512/' /etc/pam.d/common-password
+      sed -i 's/PASS_MAX_DAYS.*/PASS_MAX_DAYS 90/' /etc/login.defs
+      sed -i 's/PASS_MIN_DAYS.*/PASS_MIN_DAYS 10/' /etc/login.defs
+      sed -i 's/PASS_WARN_AGE.*/PASS_WARN_AGE 7/' /etc/login.defs
+      echo "auth    required    pam_faillock.so preauth audit silent deny=5 unlock_time=900" >> /etc/pam.d/common-auth
+      dialog --title "User Management - Password Policy" --msgbox "All passwords require 14 characters and require uppercase, lowercase, digits, and special characters" 0 0
+    fi
+    if [ "$option" == 7 ]; then
+      echo "allow-guest=false" >> /etc/lightdm/lightdm.conf
+      dialog --title "User Management - Guest Account" --msgbox "Guest account disabled, if present" 0 0
+    fi
+    if [ "$option" == 8 ]; then
+      sudo -u "$(logname)" gsettings set org.gnome.desktop.session idle-delay 300 2> /dev/null
+      sudo -u "$(logname)" xset s 300 2> /dev/null
+      sudo -u "$(logname)" gsettings get org.gnome.desktop.screensaver lock-enabled true
+      sudo -u "$(logname)" gsettings set org.gnome.desktop.screensaver lock-delay 0
+      dialog --title "User Management - Various Tweaks" --msgbox "Enabled various tweaks!" 0 0
     fi
   done
 }
