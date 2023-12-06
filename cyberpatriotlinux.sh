@@ -34,7 +34,7 @@ dialog --msgbox "This is not a comprehensive utility; many operations will still
 user_management_menu() {
   userm=$(dialog --checklist "Select what user management you want done: " 0 0 0 --output-fd 1 \
     1 "Replace passwords of administrators" off \
-    2 "Remove unauthorized users from sudo and add users supposed to be in sudo" off \
+    2 "Manage users with administrator privileges" off \
     3 "Remove unauthorized users" off \
     4 "Disable root login" off \
     5 "Enable password policy practices" off \
@@ -64,7 +64,7 @@ user_management_menu() {
           # Add the username and password pair to the password list
           password_list="$password_list$users:$password\n"
           # Make a file with all the changed passwords (insecure but whatever, this is not meant to run outside of Cyber Patriot)
-          echo -e "$password_list$users:$password\n" >> ./changedpasswords.txt
+          echo -e "$password_list\n" >> ./changedpasswords.txt
       done
       # Display the password list in a single msgbox
       dialog --title "New Passwords for Admins" --msgbox "$password_list" 0 0
