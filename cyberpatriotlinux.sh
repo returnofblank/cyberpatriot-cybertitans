@@ -229,17 +229,17 @@ package_management_menu (){
   for option in $packagem; do
     if [ "$option" == 1 ]; then
       dialog --title "Package Operations" --infobox "Updating system repositories" 0 0
-      apt update
+      xterm -e 'apt update' &
       dialog --title "Package Operations - Repo Updates" --msgbox "Updated system repositories!" 0 0
     fi
     if [ "$option" == 2 ]; then
       dialog  --infobox "Upgrading packages..." 0 0
-      apt -y upgrade
+      xterm -e 'apt -y full-upgrade' &
       dialog --title "Package Operations - Package Upgrades" --msgbox "Upgraded system packages!" 0 0
     fi
     if [ "$option" == 3 ]; then
       dialog  --infobox "Enabling automatic updates..." 0 0
-      apt -y install unattended-upgrades apt-listchanges
+      xterm -e 'apt -y install unattended-upgrades apt-listchanges' &
       dpkg-reconfigure -plow unattended-upgrades
       sed -i 's/APT::Periodic::Update-Package-Lists "0";/APT::Periodic::Update-Package-Lists "1";/' /etc/apt/apt.conf.d/20auto-upgrades
       dialog --title "Package Operations - Automatic Updates" --msgbox "Enabled automatic updates!" 0 0
@@ -258,13 +258,13 @@ package_management_menu (){
       # Convert the package list into an array
       package_array=()
       for package in $aptlist; do
-          package_array+=($package)
+        package_array+=($package)
       done
 
       # Add "off" after each package
       final_package_array=()
       for package in "${package_array[@]}"; do
-          final_package_array+=($package "" off)
+        final_package_array+=($package "" off)
       done
 
       # Use dialog to prompt the user for a list of usernames TO DELETE!!!
@@ -289,7 +289,7 @@ firewall_management_menu (){
   for option in $firewallm; do
     if [ "$option" == 1 ]; then
       dialog  --infobox "Installing and enabling UFW..." 0 0
-      apt -y install ufw
+      xterm -e 'apt -y install ufw' &
       ufw enable
       dialog --title "Firewall Operations - UFW" --msgbox "Installed and enabled UFW!" 0 0
     fi
@@ -326,7 +326,7 @@ service_management_menu (){
       # Add "off" after each output
       final_output_array=()
       for output in "${excluded[@]}"; do
-          final_output_array+=($output "" off)
+        final_output_array+=($output "" off)
       done
           
       # Use dialog to prompt the user for a list of services to stop
@@ -342,8 +342,8 @@ service_management_menu (){
     if [ "$option" == 2 ]; then
       dialog  --infobox "Rewriting /etc/ssh/sshd_config..." 0 0
       sed -i 's/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config
-      systemctl restart sshd.service
-      systemctl restart ssh.service
+      systemctl restart sshd.service >/dev/null
+      systemctl restart ssh.service >/dev/null
       dialog --title "Service Operations - SSHD Root Login" --msgbox "Root login no longer permitted for SSH Daemon!" 0 0
     fi
     if [ "$option" == 3 ]; then
@@ -368,7 +368,7 @@ service_management_menu (){
     fi
     if [ "$option" == 5 ]; then
       dialog --title "Service Operations - Boot-Up Manager" --msgbox "This will launch stacer, a utility for managing boot-up applications, once you are finished, you can close the program to exit." 0 0
-      apt -y install stacer
+      apt -y install stacer >/dev/null
       stacer
     fi
     if [ "$option" == 6 ]; then
