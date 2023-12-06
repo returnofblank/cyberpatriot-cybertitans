@@ -552,7 +552,7 @@ misc_management_menu () {
   for option in $infom; do
     if [ "$option" == 1 ]; then
       dialog  --infobox "Searching / directory for files with attributes..." 0 0
-      attributels=$(find / \( -path /proc -o -path /sys -o -path /dev -o -path /run -o -path /snap \) -prune -o -type f -exec lsattr {} \; | grep -v -e "--------------e-------" | grep -v -e "----------------------")
+      attributels=$(find / \( -path /proc -o -path /sys -o -path /dev -o -path /run -o -path /snap \) -prune -o -type f -print0 | xargs -0 lsattr 2>/dev/null | grep -v -e "--------------e-------" -e "----------------------")
       if [ "$attributels" == "" ]; then
         dialog --title "Misc - Files With Attributes" --msgbox "No files with attributes found" 0 0
       else
@@ -571,8 +571,9 @@ misc_management_menu () {
         file_list=""
         for entry in $filenames; do
           # Extract the file path by removing the attributes (everything up to the first space)
-          chattr -aAcCdDeijPsStTu "$file"
-          file_list+="$file_path\n"
+          filelocs=$(echo "$entry" | cut -d ' ' -f 2-)
+          chattr -aAcCdDijPsStTu "$filelocs"
+          file_list+="$entry\n"
         done
         dialog --title "Misc - Removed Attributes From These Files" --msgbox "$file_list" 0 0
       fi
