@@ -453,20 +453,7 @@ system_management_menu () {
   # Run commands based on output of dialog
   for option in $systemm; do
     if [ "$option" == 1 ]; then
-      touch /etc/sysctl.d/99-custom.conf
-      {
-        echo "net.ipv4.tcp_syncookies = 1"
-        echo "net.ipv4.tcp_rfc1337 = 1"
-        echo "net.ipv4.ip_forward = 0"
-        echo "net.ipv4.conf.all.accept_source_route=0"
-        echo "net.ipv4.conf.all.accept_redirects=0"
-        echo "net.ipv4.conf.default.accept_redirects=0"
-        echo "net.ipv4.conf.all.log_martians=1 "
-        echo "net.ipv4.conf.default.log_martians=1"
-        echo "net.ipv4.conf.all.rp_filter = 1"
-        echo "net.ipv4.conf.all.send_redirects = 0"
-        echo "kernel.exec-shield = 1"
-      } >> /etc/sysctl.d/99-custom.conf
+      curl -o /etc/sysctl.d/99-custom.conf https://raw.githubusercontent.com/k4yt3x/sysctl/master/sysctl.conf
       dialog  --title "System Management - Kernel Security Measures" --msgbox "Implemented various kernel tweaks!" 0 0
       sysctl -p /etc/sysctl.d/99-custom.conf
     fi
@@ -477,7 +464,7 @@ system_management_menu () {
     if [ "$option" == 3 ]; then
       chmod 644 /etc/passwd
       chmod 640 /etc/shadow
-      dialog  --title "System Management - Permissions Config" --msgbox "Changed /etc/passwd to use 644 permissions, /etc/shadow to use 640 permissions" 0 0
+      dialog  --title "System Management - Permissions Config" --msgbox "Changed /etc/passwd to use 644 permissions and /etc/shadow to use 640 permissions" 0 0
     fi
     if [ "$option" == 4 ]; then
       echo '* hard core 0' >> /etc/security/limits.conf
@@ -516,7 +503,7 @@ system_management_menu () {
 }
 misc_management_menu () {
   infom=$(dialog --checklist "Various micellaneous options that doesn't fit with any of the other categories, or sometimes may not help gain points: " 0 0 0 --output-fd 1 \
-    1 "List all files/directories with an attribute and remove the attributes" off \
+    1 "List and remove all files/directories with an attribute" off \
     2 "List and remove potential unauthorized files in /home" off \
     3 "List contents of /etc/grub.d/40_custom to check for malicious options" off \
     4 "List files with a SUID or GUID permission value set to it and clear them" off \
@@ -610,7 +597,7 @@ misc_management_menu () {
       fi
     fi
     if [ "$option" == 5 ]; then
-      dialog --title "Information - List Contents of /etc/hosts" --msgbox "This will launch visudo using the nano editor, press CTRL + X to exit, and choose whether to save or not. Beware, what you do here can break the system!" 0 0
+      dialog --title "Information - List Contents of /etc/hosts" --msgbox "This will launch visudo using the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
       nano /etc/hosts
     fi
   done
