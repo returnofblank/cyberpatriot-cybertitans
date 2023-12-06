@@ -25,6 +25,16 @@ if [[ $? -ne 0 ]]; then
   sudo apt -y install $PACKAGE_NAME
 fi
 
+# Package name to check
+PACKAGE_NAME="curl"
+
+# Check if the package is installed
+dpkg --get-selections | grep -q $PACKAGE_NAME > /dev/null
+if [[ $? -ne 0 ]]; then
+  echo "The package $PACKAGE_NAME is not installed."
+  sudo apt -y install $PACKAGE_NAME
+fi
+
 #Enable distro agnostic identification of administrators
 if [[ -f /etc/os-release ]]; then
     source /etc/os-release
