@@ -223,7 +223,8 @@ package_management_menu (){
     2 "Upgrade system packages" off \
     3 "Enable automatic updates" off \
     4 "Remove potential hacking tools and games" off \
-    5 "Remove manually installed packages" off
+    5 "Remove manually installed packages" off \
+    6 "List packages with a hold set on them" off
     )
   # Run commands based on output of dialog
   for option in $packagem; do
@@ -267,7 +268,7 @@ package_management_menu (){
         final_package_array+=($package "" off)
       done
 
-      # Use dialog to prompt the user for a list of usernames TO DELETE!!!
+      # Use dialog to prompt the user
       packages=$(dialog --title "Package Management - Remove Manually Installed Packages" --checklist "Select manually installed packages which should be DELETED (Exercise caution, not every unfamiliar package is dangerous):" 0 0 0 "${final_package_array[@]}" --output-fd 1)
       package_list=""
       for package in $packages; do
@@ -275,6 +276,31 @@ package_management_menu (){
         package_list="$package_list$package\n"
       done
       dialog --title "Package Management - Deleted Packages" --msgbox "$package_list" 0 0
+    fi
+    if [ "$option" == 6 ]; then
+      # Get a list of all held packages
+      held=$(apt-mark showhold)
+
+      # Convert the package list into an array
+      package_array=()
+      for package in $held; do
+        package_array+=($package)
+      done
+
+      # Add "off" after each package
+      final_package_array=()
+      for package in "${package_array[@]}"; do
+        final_package_array+=($package "" off)
+      done
+
+      # Use dialog to prompt the user
+      packages=$(dialog --title "Package Management - Unhold Packages" --checklist "Select which held packages to unhold:" 0 0 0 "${final_package_array[@]}" --output-fd 1)
+      package_list=""
+      for package in $packages; do
+        apt-mark unhold $package
+        package_list="$package_list$package\n"
+      done
+      dialog --title "Package Management - Unheld Packages" --msgbox "$package_list" 0 0
     fi
   done
 }
