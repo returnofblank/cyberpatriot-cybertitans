@@ -543,7 +543,7 @@ system_management_menu () {
 }
 misc_management_menu () {
   infom=$(dialog --checklist "Various micellaneous options that doesn't fit with any of the other categories, or sometimes may not help gain points: " 0 0 0 --output-fd 1 \
-    1 "List and remove attributes of files/directories with one" off \
+    1 "List and clear immutable attributes of files/directories" off \
     2 "List and remove potential unauthorized files in /home" off \
     3 "List contents of /etc/grub.d/40_custom to check for malicious options" off \
     4 "List files with a SUID or GUID permission value set to it and clear them" off \
@@ -551,28 +551,28 @@ misc_management_menu () {
     )
   for option in $infom; do
     if [ "$option" == 1 ]; then
-      dialog  --infobox "Searching / directory for files with attributes..." 0 0
-      attributels=$(find / \( -path /proc -o -path /sys -o -path /dev -o -path /run -o -path /snap \) -prune -o -type f -print0 | xargs -0 lsattr 2>/dev/null | grep -v -e "--------------e-------" -e "----------------------")
+      dialog  --infobox "Searching / directory for files with immutable attributes..." 0 0
+      attributels=$(lsattr -laR / 2>/dev/null | grep "Immutable" | awk {'print $1'})
       if [ "$attributels" == "" ]; then
         dialog --title "Misc - Files With Attributes" --msgbox "No files with attributes found" 0 0
       else
+        # Convert into array
         file_array=()
-        while IFS= read -r line; do
-          # Split the line into attributes and filename
-          attributes=$(echo "$line" | awk '{print $1}')
-          file=$(echo "$line" | awk '{$1=""; print $0}' | sed 's/^ *//g')  # Remove leading spaces after removing the first field
-          combined="$attributes $file"
-          # Ensure each entry in the array is a separate argument
-          file_array+=("$combined" "" "off")
-        done <<< "$attributels"
+        for file in $attributels; do
+            file_array+=("$file")
+        done
+
+        # Add "off" after each output
+        final_output_array=()
+        for output in "${file_array[@]}"; do
+            final_output_array+=("$output" "" off)
+        done
 
         # Use dialog to prompt the user for a list of files to remove attributes
-        filenames=($(dialog --title "Misc - Remove Attributes" --checklist "Select files from which to remove the file attributes:" 0 0 0 "${file_array[@]}" --output-fd 1))
+        filenames=$(dialog --title "Misc - Remove Attributes" --checklist "Select files from which to remove the file attributes:" 0 0 0 "${final_output_array[@]}" --output-fd 1)
         file_list=""
         for entry in $filenames; do
-          # Extract the file path by removing the attributes (everything up to the first space)
-          filelocs=$(echo "$entry" | cut -d ' ' -f 2-)
-          chattr -aAcCdDijPsStTu "$filelocs"
+          chattr -i "$entry"
           file_list+="$entry\n"
         done
         dialog --title "Misc - Removed Attributes From These Files" --msgbox "$file_list" 0 0
