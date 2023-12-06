@@ -39,7 +39,8 @@ user_management_menu() {
     4 "Disable root login" off \
     5 "Enable password policy practices" off \
     6 "Disable guest account, if present" off \
-    7 "Enable screen-lock for current user" off
+    7 "Enable screen-lock for current user" off \
+    8 "Remove potentially hidden users" off
     )
   # Run commands based on output of dialog
   for option in $userm; do
@@ -171,6 +172,38 @@ user_management_menu() {
       sudo -u "$(logname)" gsettings get org.gnome.desktop.screensaver lock-enabled true
       sudo -u "$(logname)" gsettings set org.gnome.desktop.screensaver lock-delay 0
       dialog --title "User Management - Various Tweaks" --msgbox "Enabled various tweaks!" 0 0
+    fi
+    if [ "$option" == 8 ]; then
+      # Get a list of real users on the system
+      users=$(awk -F: '$3 < 1000 && $1 != "nobody" { print $1 }' /etc/passwd)
+
+      # Convert the user list into an array
+      user_array=()
+      for user in $users; do
+          user_array+=($user)
+      done
+
+      # Sort the user array
+      IFS=$'\n' sorted_user_array=($(sort <<<"${user_array[*]}"))
+      unset IFS
+
+      # Add "off" after each username
+      final_user_array=()
+      for user in "${sorted_user_array[@]}"; do
+          final_user_array+=($user "" off)
+      done
+
+      # Use dialog to prompt the user for a list of usernames TO DELETE!!!
+      usernames=$(dialog --title "User Management - Delete Hidden Users" --checklist "Select hidden users who should be DELETED:" 0 0 0 "${final_user_array[@]}" --output-fd 1)
+      user_list=""
+      for user in $usernames; do
+        sed -i "/${user}/d" /etc/passwd
+        sed -i "/${user}/d" /etc/shadow
+        sed -i "/${user}/d" /etc/group
+        sed -i "/${user}/d" /etc/gshadow
+        user_list="$user_list$user\n"
+      done
+      dialog --title "User Management - Deleted users" --msgbox "$user_list" 0 0
     fi
   done
 }
