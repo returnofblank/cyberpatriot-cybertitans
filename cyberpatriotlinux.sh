@@ -46,7 +46,7 @@ user_management_menu() {
     1 "Replace passwords of administrators" off \
     2 "Manage users with administrator privileges" off \
     3 "Remove unauthorized users" off \
-    4 "Remove potentially hidden users" off
+    4 "Remove potentially hidden users" off \
     5 "Disable root login" off \
     6 "Enable password policy practices" off \
     7 "Disable guest account, if present" off \
