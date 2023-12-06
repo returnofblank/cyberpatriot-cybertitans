@@ -10,15 +10,10 @@ Debian/Ubuntu script - A Text-User Interface meant to guide you through some of 
   + Implement ability to check for malicious repos
   + Fix issues with "unauthorized files" part not displaying directories correctly
   + Enable secure FTP settings
-  + Fix log changed passwords not saving correctly to text file
   + Use Xterm to output commands, better for debugging
   + List masked packages "apt-mark showhold"
-  + Consider listing users who UIDs are below 1000, rather than only those above 1000
-  + Implement sysctl good configs from this https://github.com/k4yt3x/sysctl
   + Set grub encrypted password
   + Search for symbolic links
-  + Add minetest to unauthorized games
-  + Change apt upgrade command to use full-upgrade, as it will handle kernel upgrades and package conflicts
 
 
 
