@@ -44,8 +44,8 @@ if [[ -f /etc/os-release ]]; then
 		group_name="wheel"
 	fi
 else
-	# Fallback to "wheel" if /etc/os-release is not available
-	group_name="wheel"
+	# Fallback to "sudo" if /etc/os-release is not available
+	group_name="sudo"
 fi
 
 dialog --msgbox "This is not a comprehensive utility; many operations will still have to be done manually!" 0 0
