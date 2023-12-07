@@ -606,7 +606,7 @@ misc_management_menu () {
 		3 "List files with a SUID or GUID permission value set to it and clear them" off \
 		4 "List contents of /etc/hosts file to find potentially harmful DNS redirects" off \
 		5 "Edit files in /etc/skel to find malicious entries" off \
-		6 "Find symbolic links in /bin and /sbin, with the option to unlink" off
+		6 "Find and unlink symbolic links in /bin and /sbin" off
 		)
 	for option in $infom; do
 		if [ "$option" == 1 ]; then
