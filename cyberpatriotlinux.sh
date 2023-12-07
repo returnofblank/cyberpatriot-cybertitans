@@ -625,7 +625,7 @@ system_management_menu () {
 		fi
 	done
 }
-misc_management_menu () {
+fs_management_menu () {
 	infom=$(dialog --checklist "Various miscellaneous options that doesn't fit with any of the other categories, or sometimes may not help gain points: " 0 0 0 --output-fd 1 \
 		1 "List and clear immutable attributes of files/directories" off \
 		2 "List and remove potential unauthorized files in /home" off \
@@ -637,7 +637,7 @@ misc_management_menu () {
 			dialog  --infobox "Searching / directory for files with immutable attributes..." 0 0
 			readarray -t attrLines < <(lsattr -laR / 2>/dev/null | grep "Immutable" | sed 's/ Immutable//g')
 			if [ ${#attrLines[@]} -eq 0 ]; then
-				dialog --title "Misc - Files With Attributes" --msgbox "No files with attributes found" 0 0
+				dialog --title "File Management - Files With Attributes" --msgbox "No files with attributes found" 0 0
 			else
 				# Convert into array
 				dialogArray=()
@@ -646,7 +646,7 @@ misc_management_menu () {
 				done
 
 				# Use dialog to prompt the user for a list of files to remove attributes
-				filenames=$(dialog --separate-output --title "Misc - Remove Attributes" --checklist "Select files from which to remove the file attributes:" 0 0 0 "${dialogArray[@]}" --output-fd 1)
+				filenames=$(dialog --separate-output --title "File Management - Remove Attributes" --checklist "Select files from which to remove the file attributes:" 0 0 0 "${dialogArray[@]}" --output-fd 1)
 				OLDIFS=$IFS
 				IFS=$'\n'
 				file_list=""
@@ -656,14 +656,14 @@ misc_management_menu () {
 					file_list+="$entry\n"
 				done
 				IFS=$OLDIFS
-				dialog --title "Misc - Removed Attributes From These Files" --msgbox "$file_list" 0 0
+				dialog --title "File Management - Removed Attributes From These Files" --msgbox "$file_list" 0 0
 			fi
 		fi
 		if [ "$option" == 2 ]; then
 			dialog  --infobox "Searching /home directories for potentially unauthorized files..." 0 0
 			readarray -t filels < <(find /home -type f \( -name "*.wav" -o -name "*.mp3" -o -name "*.png" -o -name "*.mp4" -o -name "*.mkv" -o -name "*.webm" -o -name "*.webp" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.avi" -o -name "*.flv" -o -name "*.mov" -o -name "*.wmv" -o -name "*.m4v" \))
 			if [ ${#filels[@]} -eq 0 ]; then
-				dialog --title "Misc - Unauthorized Files" --msgbox "No unauthorized files found" 0 0
+				dialog --title "File Management - Unauthorized Files" --msgbox "No unauthorized files found" 0 0
 			else
 				# Convert the file list into an array
 				file_array=()
@@ -672,7 +672,7 @@ misc_management_menu () {
 				done
 
 				# Use dialog to prompt the user for a list of files to delete
-				filelocations=$(dialog --separate-output --title "Misc - Delete Files" --checklist "Found these potentially unauthorized files - Select which files should be deleted:" 0 0 0 "${file_array[@]}" --output-fd 1)
+				filelocations=$(dialog --separate-output --title "File Management - Delete Files" --checklist "Found these potentially unauthorized files - Select which files should be deleted:" 0 0 0 "${file_array[@]}" --output-fd 1)
 				OLDIFS=$IFS
 				IFS=$'\n'
 				file_list=""
@@ -681,7 +681,7 @@ misc_management_menu () {
 					file_list="$file_list$file\n"
 				done
 				IFS=$OLDIFS
-				dialog --title "User Management - Deleted files" --msgbox "$file_list" 0 0
+				dialog --title "File Management - Deleted files" --msgbox "$file_list" 0 0
 			fi
 		fi
 		if [ "$option" == 3 ]; then
@@ -689,7 +689,7 @@ misc_management_menu () {
 			readarray -t suidguid < <(find / -type f \( -perm /4000 -o -perm /2000 \) -exec stat -c "%A %U %n" {} \; | awk '{print $3}')
 
 			if [ ${#suidguid[@]} -eq 0 ]; then
-				dialog --title "Misc - SUID/GUID Permissions" --msgbox "No files found with a SUID/GUID Permission" 0 0
+				dialog --title "File Management - SUID/GUID Permissions" --msgbox "No files found with a SUID/GUID Permission" 0 0
 			else
 				# Convert the file list into an array
 				file_array=()
@@ -697,8 +697,8 @@ misc_management_menu () {
 					file_array+=("$file" "" off)
 				done
 
-				# Use dialog to prompt the user for a list of files TO DELETE!!!
-				suguidinput=$(dialog --separate-output --title "Misc - SUID/GUID Permissions" --checklist "Found these files with a SUID/GUID Permission - Select which files should be cleared of these:" 0 0 0 "${file_array[@]}" --output-fd 1)
+				# Use dialog to prompt the user for a list of files to clear
+				suguidinput=$(dialog --separate-output --title "File Management - SUID/GUID Permissions" --checklist "Found these files with a SUID/GUID Permission - Select which files should be cleared of these:" 0 0 0 "${file_array[@]}" --output-fd 1)
 				suguid_list=""
 				OLDIFS=$IFS
 				IFS=$'\n'
@@ -707,20 +707,20 @@ misc_management_menu () {
 					suguid_list="$suguid_list$perm\n"
 				done
 				IFS=$OLDIFS
-				dialog --title "Misc - Removed SUID/GUID Permissions" --msgbox "$suguid_list" 0 0
+				dialog --title "File Management - Removed SUID/GUID Permissions" --msgbox "$suguid_list" 0 0
 			fi
 		fi
 		if [ "$option" == 4 ]; then
 			readarray -t links < <(find /sbin/* /bin/* /usr/bin/* -type l)
 			if [ ${#links[@]} -eq 0 ]; then
-				dialog --title "Misc - Find Symbolic Links" --msgbox "No symbolic links found" 0 0
+				dialog --title "File Management - Find Symbolic Links" --msgbox "No symbolic links found" 0 0
 			else
 				file_array=()
 				for file in "${links[@]}"; do
 					file_array+=("$file" "" off)
 				done
 
-				symbolicinput=$(dialog --separate-output --title "Misc - Find Symbolic Links" --checklist "Found these symbolic links - Select which files should be unlinked:" 0 0 0 "${file_array[@]}" --output-fd 1)
+				symbolicinput=$(dialog --separate-output --title "File Management - Find Symbolic Links" --checklist "Found these symbolic links - Select which files should be unlinked:" 0 0 0 "${file_array[@]}" --output-fd 1)
 				symbolic_list=""
 				OLDIFS=$IFS
 				IFS=$'\n'
@@ -729,7 +729,7 @@ misc_management_menu () {
 					symbolic_list="$symbolic_list$file\n"
 				done
 				IFS=$OLDIFS
-				dialog --title "Misc - Removed Symbolic Links" --msgbox "$symbolic_list" 0 0
+				dialog --title "File Management - Removed Symbolic Links" --msgbox "$symbolic_list" 0 0
 			fi
 		fi
 	done
@@ -743,7 +743,7 @@ while true; do
 		4 "Service Management" \
 		5 "Malware Checks" \
 		6 "System Management" \
-		7 "Miscellaneous" \
+		7 "File Management" \
 		8 "Finished (Close Prompt)"
 	)
 	if [ $? -ne 0 ]; then
@@ -756,7 +756,7 @@ while true; do
 		4) service_management_menu ;;
 		5) malware_management_menu ;;
 		6) system_management_menu ;;
-		7) misc_management_menu ;;
+		7) fs_management_menu ;;
 		8) clear && exit 0 ;;
 	esac
 done
