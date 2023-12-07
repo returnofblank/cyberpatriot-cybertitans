@@ -631,6 +631,7 @@ system_management_menu () {
 			3 "Userwide: ~/.bashrc" \
 			4 "Userwide: ~/.bash_profile"
 			)
+			dialog --title "System Management - Edit bash configuration" --msgbox "This will launch the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
 			case $bash_files in
 				1) nano /etc/bash.bashrc ;;
 				2) nano /etc/profile ;;
