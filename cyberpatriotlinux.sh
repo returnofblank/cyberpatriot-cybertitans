@@ -498,7 +498,7 @@ system_management_menu () {
 		3 "Secure permissions of /etc/passwd and /etc/shadow" off \
 		4 "Disable system core dump" off \
 		5 "List & disable loaded kernel modules" off \
-		6 "Manage cron jobs" off
+		6 "Manage system-wide cron jobs" off
 		)
 	# Run commands based on output of dialog
 	for option in $systemm; do
