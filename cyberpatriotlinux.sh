@@ -382,8 +382,8 @@ service_management_menu (){
 			service_names=$(dialog --checklist "Select which services should be disabled:" 0 0 0 "${final_output_array[@]}" --output-fd 1)
 			service_list=""
 			for service in $service_names; do
-				systemctl disable $service >/dev/null
-				systemctl stop $service >/dev/null
+				systemctl disable "$service" >/dev/null
+				systemctl stop "$service" >/dev/null
 				service_list="$service_list$service\n"
 			done
 			dialog --title "Service Operations - Disabled Services" --msgbox "$service_list" 0 0
