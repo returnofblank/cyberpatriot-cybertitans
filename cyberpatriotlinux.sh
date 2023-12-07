@@ -567,7 +567,27 @@ system_management_menu () {
 			nano "${files[$selected_file_index]}"
 		fi
 		if [ "$option" == 7 ]; then
-			
+			readarray -t links < <(find / -type l)
+			if [ ${#links[@]} -eq 0 ]; then
+				dialog --title "Misc - Find Symbolic Links" --msgbox "No symbolic links found" 0 0
+			else
+				# Convert the file list into an array
+				file_array=()
+				for file in "${slinks[@]}"; do
+					file_array+=("$file" "" off)
+				done
+
+				symbolicinput=$(dialog --separate-output --title "Misc - Find Symbolic Links" --checklist "Found these symbolic links - Select which files should be unlinked:" 0 0 0 "${file_array[@]}" --output-fd 1)
+				
+				symbolic_list=""
+				OLDIFS=$IFS
+				IFS=$'\n'
+				for file in $symbolicinput; do
+					unlink "$file" >/dev/null
+					symbolic_list="$symbolic_list$file\n"
+				done
+				IFS=$OLDIFS
+				dialog --title "Misc - Removed Symbolic Links" --msgbox "$symbolic_list" 0 0
 		fi
 	done
 }
