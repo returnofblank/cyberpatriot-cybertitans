@@ -501,6 +501,8 @@ system_management_menu () {
 		6 "Manage system-wide cron jobs" off \
 		7 "Set Grub password" off \
 		8 "Edit files in /etc/grub.d/ to find malicious options" off \
+		9 "List contents of /etc/hosts file to find potentially harmful DNS redirects" off \
+		10 "Edit files in /etc/skel to find malicious entries" off
 		)
 	# Run commands based on output of dialog
 	for option in $systemm; do
@@ -576,7 +578,7 @@ system_management_menu () {
 			update-grub
 			dialog --title "System Management - Grub Password" --msgbox "Your Grub password is: $grubpwd" 0 0
 		fi
-		if [ "$option" == 7 ]; then
+		if [ "$option" == 8 ]; then
 			shopt -s extglob
 			shopt -s dotglob
 			files=()
@@ -597,6 +599,30 @@ system_management_menu () {
 			nano "${files[$selected_file_index]}"
 			update-grub
 		fi
+		if [ "$option" == 9 ]; then
+			dialog --title "System Management - List Contents of /etc/hosts" --msgbox "This will launch the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
+			nano /etc/hosts
+		fi
+		if [ "$option" == 10 ]; then
+			shopt -s extglob
+			shopt -s dotglob
+			files=()
+			i=0
+			for file in /etc/skel/*; do
+				files+=("$file")
+				((i++))
+			done
+
+			options=()
+			for i in "${!files[@]}"; do
+				options+=($((i + 1)) "${files[i]}")
+			done
+
+			skelfiles=$(dialog --title "System Management - Edit /etc/skel" --menu "Found these files in /etc/skel - Select which file should be edited:" 0 0 0 --output-fd 1 "${options[@]}")
+			dialog --title "System Management - Edit /etc/skel" --msgbox "This will launch the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
+			selected_file_index=$((skelfiles - 1))
+			nano "${files[$selected_file_index]}"
+		fi
 	done
 }
 misc_management_menu () {
@@ -604,9 +630,7 @@ misc_management_menu () {
 		1 "List and clear immutable attributes of files/directories" off \
 		2 "List and remove potential unauthorized files in /home" off \
 		3 "List files with a SUID or GUID permission value set to it and clear them" off \
-		4 "List contents of /etc/hosts file to find potentially harmful DNS redirects" off \
-		5 "Edit files in /etc/skel to find malicious entries" off \
-		6 "Find and unlink symbolic links in /bin and /sbin" off
+		4 "Find and unlink symbolic links in /bin and /sbin" off
 		)
 	for option in $infom; do
 		if [ "$option" == 1 ]; then
@@ -687,30 +711,6 @@ misc_management_menu () {
 			fi
 		fi
 		if [ "$option" == 4 ]; then
-			dialog --title "Misc - List Contents of /etc/hosts" --msgbox "This will launch the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
-			nano /etc/hosts
-		fi
-		if [ "$option" == 5 ]; then
-			shopt -s extglob
-			shopt -s dotglob
-			files=()
-			i=0
-			for file in /etc/skel/*; do
-				files+=("$file")
-				((i++))
-			done
-
-			options=()
-			for i in "${!files[@]}"; do
-				options+=($((i + 1)) "${files[i]}")
-			done
-
-			skelfiles=$(dialog --title "Misc - Edit /etc/skel" --menu "Found these files in /etc/skel - Select which file should be edited:" 0 0 0 --output-fd 1 "${options[@]}")
-			dialog --title "Misc - Edit /etc/skel" --msgbox "This will launch the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
-			selected_file_index=$((skelfiles - 1))
-			nano "${files[$selected_file_index]}"
-		fi
-		if [ "$option" == 6 ]; then
 			readarray -t links < <(find /sbin/* /bin/* /usr/bin/* -type l)
 			if [ ${#links[@]} -eq 0 ]; then
 				dialog --title "Misc - Find Symbolic Links" --msgbox "No symbolic links found" 0 0
