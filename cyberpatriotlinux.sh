@@ -71,7 +71,7 @@ user_management_menu() {
 			# Concatenate all of the username and password pairs into a single string
 			password_list=""
 			for users in "${sudo_user_array[@]}"; do
-				if [ "$users" = $(logname) ]; then
+				if [ "$users" = "$(logname)" ]; then
 					# Skip the current user
 					continue
 				fi
@@ -129,8 +129,8 @@ user_management_menu() {
 				# Remove users from the sudo group
 				for user in "${users_to_remove[@]}"; do
 					deluser "$user" "$group_name" >/dev/null
-					deluser "$user" adm >/dev/null
-					deluser "$user" admin >/dev/null
+					deluser "$user" "adm" >/dev/null
+					deluser "$user" "admin" >/dev/null
 				done
 
 				# Display the changes made using dialog
@@ -146,7 +146,7 @@ user_management_menu() {
 			# Convert the user list into an array
 			user_array=()
 			for user in $users; do
-				user_array+=($user)
+				user_array+=("$user")
 			done
 
 			# Sort the user array
@@ -156,7 +156,7 @@ user_management_menu() {
 			# Add "off" after each username
 			final_user_array=()
 			for user in "${sorted_user_array[@]}"; do
-				final_user_array+=($user "" off)
+				final_user_array+=("$user" "" off)
 			done
 
 			# Use dialog to prompt the user for a list of usernames TO DELETE!!!
@@ -175,7 +175,7 @@ user_management_menu() {
 			# Convert the user list into an array
 			user_array=()
 			for user in $users; do
-				user_array+=($user)
+				user_array+=("$user")
 			done
 
 			# Sort the user array
@@ -185,7 +185,7 @@ user_management_menu() {
 			# Add "off" after each username
 			final_user_array=()
 			for user in "${sorted_user_array[@]}"; do
-				final_user_array+=($user "" off)
+				final_user_array+=("$user" "" off)
 			done
 
 			# Use dialog to prompt the user for a list of usernames TO DELETE!!!
@@ -258,8 +258,8 @@ package_management_menu (){
 		fi 
 		if [ "$option" == 4 ]; then
 			dialog  --infobox "Removing games and hacking tools..." 0 0
-			for i in supertux supertuxkart wesnoth-1.14 0ad extremetuxracer minetest snort xmoto ettercap-graphical flightgear freeciv-client-gtk freeciv-client-sdl openra neverball nsnake gnome-chess gnome-mines gnome-sudoku aisleriot kpat solitaire armagetronad gl-117 hedgewars xblast-tnt chromium-bsu assaultcube trigger-rally pingus njam supertux2 frozen-bubble xboard lincity lincity-ng pioneers scummvm scummvm-tools openmw redeclipse vavoom teeworlds teeworlds-data teeworlds-server freedoom freedoom-freedm freedoom-phase1 freedoom-phase2 freedoom-timidity openarena openarena-server openarena-data openarena-0811 openarena-088 openarena-085-data openarena-085 openarena-0811-maps openttd openttd-data 0ad-data hedgewars-data hedgewars-server hedgewars-dbg berusky berusky2 berusky-data solarwolf nethack-console crawl crawl-tiles crawl-common crawl-data crawl-sdl crawl-console crawl-tiles-data crawl-tiles-sdl crawl-tiles-dbg crawl-dbg wop pingus-data edgar-data pingus-data minecraft-installer jo freedroidrpg boswars ejabberd-contrib phalanx supertuxkart stendhal supertux wireshark* ophcrack aircrack-ng john nmap metasploit-framework burp hydra sqlmap nikto maltego beef-xss cain thc-hydra ettercap-graphical netcat john-data fern-wifi-cracker dsniff hping3; do
-				apt -y remove $i
+			for package in supertux supertuxkart wesnoth-1.14 0ad extremetuxracer minetest snort xmoto ettercap-graphical flightgear freeciv-client-gtk freeciv-client-sdl openra neverball nsnake gnome-chess gnome-mines gnome-sudoku aisleriot kpat solitaire armagetronad gl-117 hedgewars xblast-tnt chromium-bsu assaultcube trigger-rally pingus njam supertux2 frozen-bubble xboard lincity lincity-ng pioneers scummvm scummvm-tools openmw redeclipse vavoom teeworlds teeworlds-data teeworlds-server freedoom freedoom-freedm freedoom-phase1 freedoom-phase2 freedoom-timidity openarena openarena-server openarena-data openarena-0811 openarena-088 openarena-085-data openarena-085 openarena-0811-maps openttd openttd-data 0ad-data hedgewars-data hedgewars-server hedgewars-dbg berusky berusky2 berusky-data solarwolf nethack-console crawl crawl-tiles crawl-common crawl-data crawl-sdl crawl-console crawl-tiles-data crawl-tiles-sdl crawl-tiles-dbg crawl-dbg wop pingus-data edgar-data pingus-data minecraft-installer jo freedroidrpg boswars ejabberd-contrib phalanx supertuxkart stendhal supertux wireshark* ophcrack aircrack-ng john nmap metasploit-framework burp hydra sqlmap nikto maltego beef-xss cain thc-hydra ettercap-graphical netcat john-data fern-wifi-cracker dsniff hping3; do
+				apt -y remove "$package"
 			done
 			dialog --title "Package Operations - Hacking Tools & Games" --msgbox "Removed games and hacking tools!" 0 0
 		fi
@@ -270,20 +270,20 @@ package_management_menu (){
 			# Convert the package list into an array
 			package_array=()
 			for package in $aptlist; do
-				package_array+=($package)
+				package_array+=("$package")
 			done
 
 			# Add "off" after each package
 			final_package_array=()
 			for package in "${package_array[@]}"; do
-				final_package_array+=($package "" off)
+				final_package_array+=("$package" "" off)
 			done
 
 			# Use dialog to prompt the user
 			packages=$(dialog --title "Package Management - Remove Manually Installed Packages" --checklist "Select manually installed packages which should be DELETED (Exercise caution, not every unfamiliar package is dangerous):" 0 0 0 "${final_package_array[@]}" --output-fd 1)
 			package_list=""
 			for package in $packages; do
-				apt -y remove $package
+				apt -y remove "$package"
 				package_list="$package_list$package\n"
 			done
 			dialog --title "Package Management - Deleted Packages" --msgbox "$package_list" 0 0
@@ -298,20 +298,20 @@ package_management_menu (){
 				# Convert the package list into an array
 				package_array=()
 				for package in $held; do
-					package_array+=($package)
+					package_array+=("$package")
 				done
 
 				# Add "off" after each package
 				final_package_array=()
 				for package in "${package_array[@]}"; do
-					final_package_array+=($package "" off)
+					final_package_array+=("$package" "" off)
 				done
 
 				# Use dialog to prompt the user
 				packages=$(dialog --title "Package Management - Unhold Packages" --checklist "Select which held packages to unhold:" 0 0 0 "${final_package_array[@]}" --output-fd 1)
 				package_list=""
 				for package in $packages; do
-					apt-mark unhold $package
+					apt-mark unhold "$package"
 					package_list="$package_list$package\n"
 				done
 				dialog --title "Package Management - Unheld Packages" --msgbox "$package_list" 0 0
@@ -375,7 +375,7 @@ service_management_menu (){
 			# Add "off" after each output
 			final_output_array=()
 			for output in "${excluded[@]}"; do
-				final_output_array+=($output "" off)
+				final_output_array+=("$output" "" off)
 			done
 					
 			# Use dialog to prompt the user for a list of services to stop
@@ -535,13 +535,13 @@ system_management_menu () {
 			# Convert into array
 			module_array=()
 			for module in $modules; do
-				module_array+=($module)
+				module_array+=("$module")
 			done
 
 			# Add "off" after each output
 			final_output_array=()
 			for output in "${module_array[@]}"; do
-				final_output_array+=($output "" off)
+				final_output_array+=("$output" "" off)
 			done
 					
 			# Use dialog to prompt the user for a list of services to stop
