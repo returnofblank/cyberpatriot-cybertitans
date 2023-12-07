@@ -5,7 +5,6 @@ Debian/Ubuntu script - A Text-User Interface meant to guide you through some of 
 
 **What needs to be complete**
   + Implement the ability to search cron jobs
-  + Implement ability to check for malicious repos
   + Enable secure FTP settings
   + Set grub encrypted password
   + Search for symbolic links
