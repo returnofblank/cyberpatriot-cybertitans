@@ -521,13 +521,13 @@ system_management_menu () {
       # Convert into array
       module_array=()
       for module in $modules; do
-          module_array+=($module)
+        module_array+=($module)
       done
 
       # Add "off" after each output
       final_output_array=()
       for output in "${module_array[@]}"; do
-          final_output_array+=($output "" off)
+        final_output_array+=($output "" off)
       done
           
       # Use dialog to prompt the user for a list of services to stop
@@ -552,29 +552,27 @@ misc_management_menu () {
   for option in $infom; do
     if [ "$option" == 1 ]; then
       dialog  --infobox "Searching / directory for files with immutable attributes..." 0 0
-      attributels=$(lsattr -laR / 2>/dev/null | grep "Immutable" | awk {'print $1'})
-      if [ "$attributels" == "" ]; then
+      readarray -t attrLines < <(lsattr -laR / 2>/dev/null | grep "Immutable" | sed 's/ Immutable//g')
+      if [ ${#attrLines[@]} -eq 0 ]; then
         dialog --title "Misc - Files With Attributes" --msgbox "No files with attributes found" 0 0
       else
         # Convert into array
-        file_array=()
-        for file in $attributels; do
-            file_array+=("$file")
-        done
-
-        # Add "off" after each output
-        final_output_array=()
-        for output in "${file_array[@]}"; do
-            final_output_array+=("$output" "" off)
+        dialogArray=()
+        for line in "${attrLines[@]}"; do
+          dialogArray+=("$line" "" off)
         done
 
         # Use dialog to prompt the user for a list of files to remove attributes
-        filenames=$(dialog --title "Misc - Remove Attributes" --checklist "Select files from which to remove the file attributes:" 0 0 0 "${final_output_array[@]}" --output-fd 1)
+        filenames=$(dialog --separate-output --title "Misc - Remove Attributes" --checklist "Select files from which to remove the file attributes:" 0 0 0 "${dialogArray[@]}" --output-fd 1)
+        OLDIFS=$IFS
+        IFS=$'\n'
         file_list=""
         for entry in $filenames; do
+          echo "$entry"
           chattr -i "$entry"
           file_list+="$entry\n"
         done
+        IFS=$OLDIFS
         dialog --title "Misc - Removed Attributes From These Files" --msgbox "$file_list" 0 0
       fi
     fi
