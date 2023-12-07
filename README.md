@@ -4,7 +4,7 @@ Various scripts made for CyberPatriot meant to automate many of the vulnerabilit
 Debian/Ubuntu script - A Text-User Interface meant to guide you through some of the common vulernabilities in the Cyber Patriot Competition
 
 **What needs to be complete**
-  + Set grub encrypted password
+  + Nothing as of now
 
 
 

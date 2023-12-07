@@ -494,7 +494,7 @@ malware_management_menu () {
 system_management_menu () {
 	systemm=$(dialog --checklist "Does general system management fixes:" 0 0 0 --output-fd 1 \
 		1 "Configure secure kernel parameters" off \
-		2 "Configure sudoers file (Know what you are doing!)" off \
+		2 "Configure sudoers file" off \
 		3 "Secure permissions of /etc/passwd and /etc/shadow" off \
 		4 "Disable system core dump" off \
 		5 "List & disable loaded kernel modules" off \
@@ -572,6 +572,7 @@ system_management_menu () {
 			hash=$(echo -e "$grubpwd\n$grubpwd" | LC_ALL=C /usr/bin/grub-mkpasswd-pbkdf2 | awk '/hash of / {print $NF}')
 			echo -e "\nset superusers=$(logname)" >> /etc/grub.d/40_custom
 			echo "password_pbkdf2 $(logname) $hash" >> /etc/grub.d/40_custom
+			update-grub
 			dialog --title "System Management - Grub Password" --msgbox "Your Grub password is: $grubpwd" 0 0
 		fi
 	done
@@ -657,6 +658,7 @@ misc_management_menu () {
 			dialog --title "Misc - Edit /etc/grub.d" --msgbox "This will launch the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
 			selected_file_index=$((grubfiles - 1))
 			nano "${files[$selected_file_index]}"
+			update-grub
 		fi
 		if [ "$option" == 4 ]; then
 			dialog  --infobox "Searching / directory for files with a SUID/GUID bit..." 0 0
