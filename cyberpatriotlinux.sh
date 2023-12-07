@@ -169,7 +169,7 @@ user_management_menu() {
       dialog --title "User Management - Deleted users" --msgbox "$user_list" 0 0
     fi
     if [ "$option" == 4 ]; then
-      # Get a list of real users on the system
+      # Get a list of users on the system
       users=$(awk -F: '$3 < 1000 && $1 != "nobody" { print $1 }' /etc/passwd)
 
       # Convert the user list into an array
