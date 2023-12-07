@@ -502,7 +502,8 @@ system_management_menu () {
 		7 "Set Grub password" off \
 		8 "Edit files in /etc/grub.d/ to find malicious options" off \
 		9 "List contents of /etc/hosts file to find potentially harmful DNS redirects" off \
-		10 "Edit files in /etc/skel to find malicious entries" off
+		10 "Edit files in /etc/skel to find malicious entries" off \
+		11 "Edit bash configuration files" off
 		)
 	# Run commands based on output of dialog
 	for option in $systemm; do
@@ -618,10 +619,24 @@ system_management_menu () {
 				options+=($((i + 1)) "${files[i]}")
 			done
 
-			skelfiles=$(dialog --title "System Management - Edit /etc/skel" --menu "Found these files in /etc/skel - Select which file should be edited:" 0 0 0 --output-fd 1 "${options[@]}")
+			skel_files=$(dialog --title "System Management - Edit /etc/skel" --menu "Found these files in /etc/skel - Select which file should be edited:" 0 0 0 --output-fd 1 "${options[@]}")
 			dialog --title "System Management - Edit /etc/skel" --msgbox "This will launch the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
-			selected_file_index=$((skelfiles - 1))
+			selected_file_index=$((skel_files - 1))
 			nano "${files[$selected_file_index]}"
+		fi
+		if [ "$option" == 11 ]; then
+			bash_files=$(dialog --title "System Management - Edit bash configuration" --menu "Select which file should be edited:" 0 0 0 --output-fd 1 \
+			1 "Systemwide: /etc/bash.bashrc" \
+			2 "Systemwide: /etc/profile" \
+			3 "Userwide: ~/.bashrc" \
+			4 "Userwide: ~/.bash_profile"
+			)
+			case $bash_files in
+				1) nano /etc/bash.bashrc ;;
+				2) nano /etc/profile ;;
+				3) nano /home/"$(logname)"/.bashrc ;;
+				4) nano /home/"$(logname)"/.bash_profile ;;
+			esac
 		fi
 	done
 }
