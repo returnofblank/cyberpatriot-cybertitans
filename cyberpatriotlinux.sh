@@ -588,6 +588,7 @@ system_management_menu () {
 				done
 				IFS=$OLDIFS
 				dialog --title "Misc - Removed Symbolic Links" --msgbox "$symbolic_list" 0 0
+			fi
 		fi
 	done
 }
