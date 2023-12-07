@@ -234,7 +234,8 @@ package_management_menu (){
     3 "Enable automatic updates" off \
     4 "Remove potential hacking tools and games" off \
     5 "Remove manually installed packages" off \
-    6 "List packages with a hold set on them" off
+    6 "List packages with a hold set on them" off \
+    7 "Launch stacer for repository management" off
     )
   # Run commands based on output of dialog
   for option in $packagem; do
@@ -314,6 +315,11 @@ package_management_menu (){
           package_list="$package_list$package\n"
         done
         dialog --title "Package Management - Unheld Packages" --msgbox "$package_list" 0 0
+      fi
+      if [ "$option" == 7 ]; then
+        dialog --title "Package Management - Repositories" --msgbox "This will launch stacer, a utility for various system management including repository management, once you are finished, you can close the program to exit." 0 0
+        apt -y install stacer >/dev/null
+        stacer
       fi
     fi
   done
@@ -410,7 +416,7 @@ service_management_menu (){
       htop
     fi
     if [ "$option" == 5 ]; then
-      dialog --title "Service Operations - Boot-Up Manager" --msgbox "This will launch stacer, a utility for managing boot-up applications, once you are finished, you can close the program to exit." 0 0
+      dialog --title "Service Operations - Boot-Up Manager" --msgbox "This will launch stacer, a utility for various system management including boot-up applications, once you are finished, you can close the program to exit." 0 0
       apt -y install stacer >/dev/null
       stacer
     fi
