@@ -499,7 +499,7 @@ system_management_menu () {
 		4 "Disable system core dump" off \
 		5 "List & disable loaded kernel modules" off \
 		6 "Manage system-wide cron jobs" off \
-		7 "Find symbolic links in /bin and /sbin, with the option to unlink" off
+		7 "Set Grub password" off
 		)
 	# Run commands based on output of dialog
 	for option in $systemm; do
@@ -561,32 +561,18 @@ system_management_menu () {
 				options+=($((i + 1)) "${files[i]}")
 			done
 
-			cronfiles=$(dialog --title "Misc - Edit Cron Jobs" --menu "Found these cron files in /etc - Select which file should be edited:" 0 0 0 --output-fd 1 "${options[@]}")
-			dialog --title "Misc - Edit Cron Jobs" --msgbox "This will launch the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
+			cronfiles=$(dialog --title "System Management - Edit Cron Jobs" --menu "Found these cron files in /etc - Select which file should be edited:" 0 0 0 --output-fd 1 "${options[@]}")
+			dialog --title "System Management - Edit Cron Jobs" --msgbox "This will launch the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
 			selected_file_index=$((cronfiles - 1))
 			nano "${files[$selected_file_index]}"
 		fi
 		if [ "$option" == 7 ]; then
-			readarray -t links < <(find /sbin/* /bin/* -type l)
-			if [ ${#links[@]} -eq 0 ]; then
-				dialog --title "Misc - Find Symbolic Links" --msgbox "No symbolic links found" 0 0
-			else
-				file_array=()
-				for file in "${links[@]}"; do
-					file_array+=("$file" "" off)
-				done
-
-				symbolicinput=$(dialog --separate-output --title "Misc - Find Symbolic Links" --checklist "Found these symbolic links - Select which files should be unlinked:" 0 0 0 "${file_array[@]}" --output-fd 1)
-				symbolic_list=""
-				OLDIFS=$IFS
-				IFS=$'\n'
-				for file in $symbolicinput; do
-					unlink "$file" >/dev/null
-					symbolic_list="$symbolic_list$file\n"
-				done
-				IFS=$OLDIFS
-				dialog --title "Misc - Removed Symbolic Links" --msgbox "$symbolic_list" 0 0
-			fi
+			dialog --title "System Management - Grub Password" --msgbox "What you are doing here can lock you out of your system if you reboot, remember the password!" 0 0
+			grubpwd=$(dialog --title "System Management - Grub Password" --inputbox "Enter the password you want to use for Grub, do NOT forget this:" 0 0 --output-fd 1)
+			hash=$(echo -e "$grubpwd\n$grubpwd" | LC_ALL=C /usr/bin/grub-mkpasswd-pbkdf2 | awk '/hash of / {print $NF}')
+			echo -e "\nset superusers=$(logname)" >> /etc/grub.d/40_custom
+			echo "password_pbkdf2 $(logname) $hash" >> /etc/grub.d/40_custom
+			dialog --title "System Management - Grub Password" --msgbox "Your Grub password is: $grubpwd" 0 0
 		fi
 	done
 }
@@ -597,7 +583,8 @@ misc_management_menu () {
 		3 "Edit files in /etc/grub.d/ to find malicious options" off \
 		4 "List files with a SUID or GUID permission value set to it and clear them" off \
 		5 "List contents of /etc/hosts file to find potentially harmful DNS redirects" off \
-		6 "Edit files in /etc/skel to find malicious entries" off
+		6 "Edit files in /etc/skel to find malicious entries" off \
+		7 "Find symbolic links in /bin and /sbin, with the option to unlink" off
 		)
 	for option in $infom; do
 		if [ "$option" == 1 ]; then
@@ -720,6 +707,28 @@ misc_management_menu () {
 			dialog --title "Misc - Edit /etc/skel" --msgbox "This will launch the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
 			selected_file_index=$((skelfiles - 1))
 			nano "${files[$selected_file_index]}"
+		fi
+		if [ "$option" == 7 ]; then
+			readarray -t links < <(find /sbin/* /bin/* -type l)
+			if [ ${#links[@]} -eq 0 ]; then
+				dialog --title "Misc - Find Symbolic Links" --msgbox "No symbolic links found" 0 0
+			else
+				file_array=()
+				for file in "${links[@]}"; do
+					file_array+=("$file" "" off)
+				done
+
+				symbolicinput=$(dialog --separate-output --title "Misc - Find Symbolic Links" --checklist "Found these symbolic links - Select which files should be unlinked:" 0 0 0 "${file_array[@]}" --output-fd 1)
+				symbolic_list=""
+				OLDIFS=$IFS
+				IFS=$'\n'
+				for file in $symbolicinput; do
+					unlink "$file" >/dev/null
+					symbolic_list="$symbolic_list$file\n"
+				done
+				IFS=$OLDIFS
+				dialog --title "Misc - Removed Symbolic Links" --msgbox "$symbolic_list" 0 0
+			fi
 		fi
 	done
 }
