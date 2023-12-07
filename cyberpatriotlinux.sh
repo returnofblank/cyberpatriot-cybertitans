@@ -379,9 +379,9 @@ service_management_menu (){
 			done
 					
 			# Use dialog to prompt the user for a list of services to stop
-			servicenames=$(dialog --checklist "Select which services should be disabled:" 0 0 0 "${final_output_array[@]}" --output-fd 1)
+			service_names=$(dialog --checklist "Select which services should be disabled:" 0 0 0 "${final_output_array[@]}" --output-fd 1)
 			service_list=""
-			for service in $servicenames; do
+			for service in $service_names; do
 				systemctl disable $service >/dev/null
 				systemctl stop $service >/dev/null
 				service_list="$service_list$service\n"
@@ -396,11 +396,11 @@ service_management_menu (){
 			dialog --title "Service Operations - SSHD Root Login" --msgbox "Root login no longer permitted for SSH Daemon!" 0 0
 		fi
 		if [ "$option" == 3 ]; then
-			services=$(dialog --title "Enable & Start Services" --inputbox "Enter a list of services (comma-separated, no spaces) you want enabled and started:" 0 0 --output-fd 1)
+			enable_services=$(dialog --title "Enable & Start Services" --inputbox "Enter a list of services (comma-separated, no spaces) you want enabled and started:" 0 0 --output-fd 1)
 			if [[ -z "${services// }" ]]; then
 				dialog --title "Service Operations - Enable & Start Services" --msgbox "No changes were made. Services were not provided." 0 0
 			else
-				IFS=',' read -ra services_array <<< "$services"
+				IFS=',' read -ra services_array <<< "$enable_services"
 
 				for service in "${services_array[@]}"; do
 					systemctl enable "$service" >/dev/null
@@ -429,20 +429,20 @@ service_management_menu (){
 		fi
 		if [ "$option" == 7 ]; then
 			# Define the valid range of SSH ports
-			MIN_PORT=1024
-			MAX_PORT=49151
+			min_port=1024
+			max_port=49151
 
 			# Generate a random port within the valid range
-			RANDOM_PORT=$(shuf -i $MIN_PORT-$MAX_PORT -n 1)
+			random_port=$(shuf -i $min_port-$max_port -n 1)
 
 			# Set the new SSH port in the configuration file
-			echo "Port $RANDOM_PORT" >> /etc/ssh/sshd_config
+			echo "Port $random_port" >> /etc/ssh/sshd_config
 
 			# Restart the SSH server to apply the new port
 			systemctl restart ssh.service
 			systemctl restart sshd.service
 
-			dialog --title "Service Operations - SSHD Port Randomization" --msgbox "New SSHD port is $RANDOM_PORT" 0 0
+			dialog --title "Service Operations - SSHD Port Randomization" --msgbox "New SSHD port is $random_port" 0 0
 		fi
 		if [ "$option" == 8 ]; then
 			systemctl enable apparmor.service
@@ -465,8 +465,8 @@ malware_management_menu () {
 			directory=$(dialog --title "ClamAV Scan" --inputbox "Enter the absolute directory you want to scan:" 0 0 --output-fd 1)
 			if [ "$directory" != "" ]; then
 				dialog  --title "ClamAV Scan" --infobox "This might take a while - Running malware check on directory '$directory' ..." 0 0
-				clamresults=$(clamscan --exclude /proc --exclude /sys --exclude /sysfs --exclude /dev --exclude /run "$directory" --recursive)
-				echo "$clamresults" | tee ./clamavresults.txt
+				clam_results=$(clamscan --exclude /proc --exclude /sys --exclude /sysfs --exclude /dev --exclude /run "$directory" --recursive)
+				echo "$clam_results" | tee ./clamavresults.txt
 				dialog --title "Results of ClamAV malware scan" --msgbox "Output of malware scan sent to clamavresults.txt, which will be located in the directory this script is ran" 0 0
 			else
 				dialog  --title "ClamAV Scan" --msgbox "No directory specified. No scans made." 0 0
@@ -593,9 +593,9 @@ system_management_menu () {
 				options+=($((i + 1)) "${files[i]}")
 			done
 
-			grubfiles=$(dialog --title "Misc - Edit /etc/grub.d" --menu "Found these files in /etc/grub.d - Select which file should be edited:" 0 0 0 --output-fd 1 "${options[@]}")
+			grub_files=$(dialog --title "Misc - Edit /etc/grub.d" --menu "Found these files in /etc/grub.d - Select which file should be edited:" 0 0 0 --output-fd 1 "${options[@]}")
 			dialog --title "Misc - Edit /etc/grub.d" --msgbox "This will launch the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
-			selected_file_index=$((grubfiles - 1))
+			selected_file_index=$((grub_files - 1))
 			nano "${files[$selected_file_index]}"
 			update-grub
 		fi
@@ -640,13 +640,13 @@ fs_management_menu () {
 				dialog --title "File Management - Files With Attributes" --msgbox "No files with attributes found" 0 0
 			else
 				# Convert into array
-				dialogArray=()
+				dialog_array=()
 				for line in "${attrLines[@]}"; do
-					dialogArray+=("$line" "" off)
+					dialog_array+=("$line" "" off)
 				done
 
 				# Use dialog to prompt the user for a list of files to remove attributes
-				filenames=$(dialog --separate-output --title "File Management - Remove Attributes" --checklist "Select files from which to remove the file attributes:" 0 0 0 "${dialogArray[@]}" --output-fd 1)
+				filenames=$(dialog --separate-output --title "File Management - Remove Attributes" --checklist "Select files from which to remove the file attributes:" 0 0 0 "${dialog_array[@]}" --output-fd 1)
 				OLDIFS=$IFS
 				IFS=$'\n'
 				file_list=""
@@ -672,11 +672,11 @@ fs_management_menu () {
 				done
 
 				# Use dialog to prompt the user for a list of files to delete
-				filelocations=$(dialog --separate-output --title "File Management - Delete Files" --checklist "Found these potentially unauthorized files - Select which files should be deleted:" 0 0 0 "${file_array[@]}" --output-fd 1)
+				file_locations=$(dialog --separate-output --title "File Management - Delete Files" --checklist "Found these potentially unauthorized files - Select which files should be deleted:" 0 0 0 "${file_array[@]}" --output-fd 1)
 				OLDIFS=$IFS
 				IFS=$'\n'
 				file_list=""
-				for file in $filelocations; do
+				for file in $file_locations; do
 					rm -f "$file" >/dev/null
 					file_list="$file_list$file\n"
 				done
@@ -686,23 +686,23 @@ fs_management_menu () {
 		fi
 		if [ "$option" == 3 ]; then
 			dialog  --infobox "Searching / directory for files with a SUID/GUID bit..." 0 0
-			readarray -t suidguid < <(find / -type f \( -perm /4000 -o -perm /2000 \) -exec stat -c "%A %U %n" {} \; | awk '{print $3}')
+			readarray -t suid_guid < <(find / -type f \( -perm /4000 -o -perm /2000 \) -exec stat -c "%A %U %n" {} \; | awk '{print $3}')
 
-			if [ ${#suidguid[@]} -eq 0 ]; then
+			if [ ${#suid_guid[@]} -eq 0 ]; then
 				dialog --title "File Management - SUID/GUID Permissions" --msgbox "No files found with a SUID/GUID Permission" 0 0
 			else
 				# Convert the file list into an array
 				file_array=()
-				for file in "${suidguid[@]}"; do
+				for file in "${suid_guid[@]}"; do
 					file_array+=("$file" "" off)
 				done
 
 				# Use dialog to prompt the user for a list of files to clear
-				suguidinput=$(dialog --separate-output --title "File Management - SUID/GUID Permissions" --checklist "Found these files with a SUID/GUID Permission - Select which files should be cleared of these:" 0 0 0 "${file_array[@]}" --output-fd 1)
+				suguid_input=$(dialog --separate-output --title "File Management - SUID/GUID Permissions" --checklist "Found these files with a SUID/GUID Permission - Select which files should be cleared of these:" 0 0 0 "${file_array[@]}" --output-fd 1)
 				suguid_list=""
 				OLDIFS=$IFS
 				IFS=$'\n'
-				for perm in $suguidinput; do
+				for perm in $suguid_input; do
 					chmod u-s,g-s "$perm" >/dev/null
 					suguid_list="$suguid_list$perm\n"
 				done
@@ -720,11 +720,11 @@ fs_management_menu () {
 					file_array+=("$file" "" off)
 				done
 
-				symbolicinput=$(dialog --separate-output --title "File Management - Find Symbolic Links" --checklist "Found these symbolic links - Select which files should be unlinked:" 0 0 0 "${file_array[@]}" --output-fd 1)
+				symbolic_input=$(dialog --separate-output --title "File Management - Find Symbolic Links" --checklist "Found these symbolic links - Select which files should be unlinked:" 0 0 0 "${file_array[@]}" --output-fd 1)
 				symbolic_list=""
 				OLDIFS=$IFS
 				IFS=$'\n'
-				for file in $symbolicinput; do
+				for file in $symbolic_input; do
 					unlink "$file" >/dev/null
 					symbolic_list="$symbolic_list$file\n"
 				done
