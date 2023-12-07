@@ -316,11 +316,11 @@ package_management_menu (){
         done
         dialog --title "Package Management - Unheld Packages" --msgbox "$package_list" 0 0
       fi
-      if [ "$option" == 7 ]; then
-        dialog --title "Package Management - Repositories" --msgbox "This will launch stacer, a utility for various system management including repository management, once you are finished, you can close the program to exit." 0 0
-        apt -y install stacer >/dev/null
-        stacer
-      fi
+    fi
+    if [ "$option" == 7 ]; then
+      dialog --title "Package Management - Repositories" --msgbox "This will launch stacer, a utility for various system management including repository management, once you are finished, you can close the program to exit." 0 0
+      apt -y install stacer >/dev/null
+      stacer
     fi
   done
 }
