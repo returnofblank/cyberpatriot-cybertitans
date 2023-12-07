@@ -573,7 +573,7 @@ system_management_menu () {
 			else
 				# Convert the file list into an array
 				file_array=()
-				for file in "${slinks[@]}"; do
+				for file in "${links[@]}"; do
 					file_array+=("$file" "" off)
 				done
 
