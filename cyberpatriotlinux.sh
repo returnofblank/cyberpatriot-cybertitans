@@ -499,7 +499,7 @@ system_management_menu () {
 		4 "Disable system core dump" off \
 		5 "List & disable loaded kernel modules" off \
 		6 "Manage system-wide cron jobs" off \
-		7 "Find symbolic links, with the option to unlink" off
+		7 "Find symbolic links in /bin and /sbin, with the option to unlink" off
 		)
 	# Run commands based on output of dialog
 	for option in $systemm; do
@@ -567,18 +567,16 @@ system_management_menu () {
 			nano "${files[$selected_file_index]}"
 		fi
 		if [ "$option" == 7 ]; then
-			readarray -t links < <(find / -type l)
+			readarray -t links < <(find /sbin/* /bin/* -type l)
 			if [ ${#links[@]} -eq 0 ]; then
 				dialog --title "Misc - Find Symbolic Links" --msgbox "No symbolic links found" 0 0
 			else
-				# Convert the file list into an array
 				file_array=()
 				for file in "${links[@]}"; do
 					file_array+=("$file" "" off)
 				done
 
 				symbolicinput=$(dialog --separate-output --title "Misc - Find Symbolic Links" --checklist "Found these symbolic links - Select which files should be unlinked:" 0 0 0 "${file_array[@]}" --output-fd 1)
-				
 				symbolic_list=""
 				OLDIFS=$IFS
 				IFS=$'\n'
