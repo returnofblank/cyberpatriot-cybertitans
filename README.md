@@ -5,7 +5,6 @@ Debian/Ubuntu script - A Text-User Interface meant to guide you through some of 
 
 **What needs to be complete**
   + Set grub encrypted password
-  + Search for symbolic links
 
 
 
