@@ -545,7 +545,7 @@ misc_management_menu () {
   infom=$(dialog --checklist "Various micellaneous options that doesn't fit with any of the other categories, or sometimes may not help gain points: " 0 0 0 --output-fd 1 \
     1 "List and clear immutable attributes of files/directories" off \
     2 "List and remove potential unauthorized files in /home" off \
-    3 "List contents of /etc/grub.d/40_custom to check for malicious options" off \
+    3 "Edit files in /etc/grub.d/ to find malicious options" off \
     4 "List files with a SUID or GUID permission value set to it and clear them" off \
     5 "List contents of /etc/hosts file to find potentially harmful DNS redirects" off \
     6 "Edit files in /etc/skel to find malicious entries" off
@@ -603,8 +603,24 @@ misc_management_menu () {
       fi
     fi
     if [ "$option" == 3 ]; then
-      dialog --title "Misc - List Contents of Grub File" --msgbox "This will launch the nano editor, press CTRL + X to exit, and choose whether to save or not. Beware, what you do here can break the system!" 0 0
-      nano /etc/grub.d/40_custom
+      shopt -s extglob
+      shopt -s dotglob
+      files=()
+      i=0
+      for file in /etc/grub.d/*; do
+        files+=("$file")
+        ((i++))
+      done
+
+      options=()
+      for i in "${!files[@]}"; do
+        options+=($((i + 1)) "${files[i]}")
+      done
+
+      grubfiles=$(dialog --title "Misc - Edit /etc/grub.d" --menu "Found these files in /etc/grub.d - Select which file should be edited:" 0 0 0 --output-fd 1 "${options[@]}")
+      dialog --title "Misc - Edit /etc/grub.d" --msgbox "This will launch visudo using the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
+      selected_file_index=$((grubfiles - 1))
+      nano "${files[$selected_file_index]}"
     fi
     if [ "$option" == 4 ]; then
       dialog  --infobox "Searching / directory for files with a SUID/GUID bit..." 0 0
