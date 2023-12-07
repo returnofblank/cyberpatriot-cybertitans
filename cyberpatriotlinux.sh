@@ -321,8 +321,8 @@ package_management_menu (){
 firewall_management_menu (){
   firewallm=$(dialog --checklist "Select what firewall operations you want done: " 0 0 0 --output-fd 1 \
     1 "Install UFW and enable" off \
-  #  2 "unfilled" off \
-  #  3 "unfilled" off \
+    2 "Open GUI UFW" off \
+    3 "List firewall rules" off \
   #  4 "unfilled" off
   )
   # Run commands based on output of dialog
@@ -333,12 +333,15 @@ firewall_management_menu (){
       ufw enable
       dialog --title "Firewall Operations - UFW" --msgbox "Installed and enabled UFW!" 0 0
     fi
-    #if [ "$option" == 2 ]; then
-
-    #fi
-    #if [ "$option" == 3 ]; then
-
-    #fi 
+    if [ "$option" == 2 ]; then
+      apt -y install gufw > /dev/null
+      gufw
+    fi
+    if [ "$option" == 3 ]; then
+      dialog --title "Firewall Operations - Open Ports" --msgbox "This requires UFW to be enabled, please ensure it is!" 0 0
+      xterm -hold -e 'ufw status verbose' &
+      dialog --title "Firewall Operations - Open Ports" --msgbox "Installed and enabled UFW!" 0 0
+    fi 
     #if [ "$option" == 4 ]; then
 
     #fi
