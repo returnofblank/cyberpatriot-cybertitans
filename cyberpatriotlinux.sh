@@ -600,7 +600,7 @@ system_management_menu () {
 	done
 }
 misc_management_menu () {
-	infom=$(dialog --checklist "Various micellaneous options that doesn't fit with any of the other categories, or sometimes may not help gain points: " 0 0 0 --output-fd 1 \
+	infom=$(dialog --checklist "Various miscellaneous options that doesn't fit with any of the other categories, or sometimes may not help gain points: " 0 0 0 --output-fd 1 \
 		1 "List and clear immutable attributes of files/directories" off \
 		2 "List and remove potential unauthorized files in /home" off \
 		3 "List files with a SUID or GUID permission value set to it and clear them" off \
