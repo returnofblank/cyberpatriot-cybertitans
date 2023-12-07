@@ -497,7 +497,8 @@ system_management_menu () {
 		2 "Configure sudoers file (Know what you are doing!)" off \
 		3 "Secure permissions of /etc/passwd and /etc/shadow" off \
 		4 "Disable system core dump" off \
-		5 "List & disable loaded kernel modules" off
+		5 "List & disable loaded kernel modules" off \
+		6 "Manage cron jobs" off
 		)
 	# Run commands based on output of dialog
 	for option in $systemm; do
@@ -547,6 +548,22 @@ system_management_menu () {
 				module_list="$module_list$module\n"
 			done
 			dialog --title "These modules have been disabled: " --msgbox "$module_list" 0 0
+		fi
+		if [ "$option" == 6 ]; then
+			files=()
+			while IFS= read -r -d '' file; do
+    		files+=("$file")
+			done < <(find /etc -type f -name "*cron*" -print0)
+
+			options=()
+			for i in "${!files[@]}"; do
+				options+=($((i + 1)) "${files[i]}")
+			done
+
+			cronfiles=$(dialog --title "Misc - Edit Cron Jobs" --menu "Found these cron files in /etc - Select which file should be edited:" 0 0 0 --output-fd 1 "${options[@]}")
+			dialog --title "Misc - Edit Cron Jobs" --msgbox "This will launch the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
+			selected_file_index=$((cronfiles - 1))
+			nano "${files[$selected_file_index]}"
 		fi
 	done
 }
@@ -627,7 +644,7 @@ misc_management_menu () {
 			done
 
 			grubfiles=$(dialog --title "Misc - Edit /etc/grub.d" --menu "Found these files in /etc/grub.d - Select which file should be edited:" 0 0 0 --output-fd 1 "${options[@]}")
-			dialog --title "Misc - Edit /etc/grub.d" --msgbox "This will launch visudo using the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
+			dialog --title "Misc - Edit /etc/grub.d" --msgbox "This will launch the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
 			selected_file_index=$((grubfiles - 1))
 			nano "${files[$selected_file_index]}"
 		fi
@@ -658,7 +675,7 @@ misc_management_menu () {
 			fi
 		fi
 		if [ "$option" == 5 ]; then
-			dialog --title "Misc - List Contents of /etc/hosts" --msgbox "This will launch visudo using the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
+			dialog --title "Misc - List Contents of /etc/hosts" --msgbox "This will launch the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
 			nano /etc/hosts
 		fi
 		if [ "$option" == 6 ]; then
@@ -677,7 +694,7 @@ misc_management_menu () {
 			done
 
 			skelfiles=$(dialog --title "Misc - Edit /etc/skel" --menu "Found these files in /etc/skel - Select which file should be edited:" 0 0 0 --output-fd 1 "${options[@]}")
-			dialog --title "Misc - Edit /etc/skel" --msgbox "This will launch visudo using the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
+			dialog --title "Misc - Edit /etc/skel" --msgbox "This will launch the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
 			selected_file_index=$((skelfiles - 1))
 			nano "${files[$selected_file_index]}"
 		fi
