@@ -711,7 +711,7 @@ misc_management_menu () {
 			nano "${files[$selected_file_index]}"
 		fi
 		if [ "$option" == 7 ]; then
-			readarray -t links < <(find /sbin/* /bin/* -type l)
+			readarray -t links < <(find /sbin/* /bin/* /usr/bin/* -type l)
 			if [ ${#links[@]} -eq 0 ]; then
 				dialog --title "Misc - Find Symbolic Links" --msgbox "No symbolic links found" 0 0
 			else
