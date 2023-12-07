@@ -606,29 +606,28 @@ misc_management_menu () {
       nano /etc/grub.d/40_custom
     fi
     if [ "$option" == 4 ]; then
-      suidguid=$(find / -type f \( -perm /4000 -o -perm /2000 \) -exec stat -c "%A %U %n" {} \; | awk '{print $3}')
+      dialog  --infobox "Searching / directory for files with a SUID/GUID bit..." 0 0
+      readarray -t suidguid < <(find / -type f \( -perm /4000 -o -perm /2000 \) -exec stat -c "%A %U %n" {} \; | awk '{print $3}')
 
-      # Convert the id list into an array
-      suguid_array=()
-      for perm in $suidguid; do
-          suguid_array+=($perm)
-      done
-      if [ "$suguid_array" == "" ]; then
+      if [ ${#suidguid[@]} -eq 0 ]; then
         dialog --title "Misc - SUID/GUID Permissions" --msgbox "No files found with a SUID/GUID Permission" 0 0
       else
-        # Add "off" after each file location
-        final_suguid_array=()
-        for perm in "${suguid_array[@]}"; do
-            final_suguid_array+=("$perm" "" off)
+        # Convert the file list into an array
+        file_array=()
+        for file in "${suidguid[@]}"; do
+          file_array+=("$file" "" off)
         done
 
         # Use dialog to prompt the user for a list of files TO DELETE!!!
-        suguidinput=$(dialog --title "Misc - SUID/GUID Permissions" --checklist "Found these files with a SUID/GUID Permission - Select which files should be cleared of these:" 0 0 0 "${final_suguid_array[@]}" --output-fd 1)
+        suguidinput=$(dialog --separate-output --title "Misc - SUID/GUID Permissions" --checklist "Found these files with a SUID/GUID Permission - Select which files should be cleared of these:" 0 0 0 "${file_array[@]}" --output-fd 1)
         suguid_list=""
+        OLDIFS=$IFS
+        IFS=$'\n'
         for perm in $suguidinput; do
           chmod u-s,g-s "$perm" >/dev/null
           suguid_list="$suguid_list$perm\n"
         done
+        IFS=$OLDIFS
         dialog --title "Misc - Removed SUID/GUID Permissions" --msgbox "$suguid_list" 0 0
       fi
     fi
