@@ -498,7 +498,8 @@ system_management_menu () {
 		3 "Secure permissions of /etc/passwd and /etc/shadow" off \
 		4 "Disable system core dump" off \
 		5 "List & disable loaded kernel modules" off \
-		6 "Manage system-wide cron jobs" off
+		6 "Manage system-wide cron jobs" off \
+		7 "Find symbolic links, with the option to unlink" off
 		)
 	# Run commands based on output of dialog
 	for option in $systemm; do
@@ -564,6 +565,9 @@ system_management_menu () {
 			dialog --title "Misc - Edit Cron Jobs" --msgbox "This will launch the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
 			selected_file_index=$((cronfiles - 1))
 			nano "${files[$selected_file_index]}"
+		fi
+		if [ "$option" == 7 ]; then
+			
 		fi
 	done
 }
