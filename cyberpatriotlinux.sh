@@ -578,28 +578,26 @@ misc_management_menu () {
     fi
     if [ "$option" == 2 ]; then
       dialog  --infobox "Searching /home directories for potentially unauthorized files..." 0 0
-      filels=$(find /home -type f \( -name "*.mp3" -o -name "*.png" -o -name "*.mp4" -o -name "*.mkv" -o -name "*.webm" -o -name "*.webp" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.avi" -o -name "*.flv" -o -name "*.mov" -o -name "*.wmv" -o -name "*.m4v" \))
-      # Convert the file list into an array
-      file_array=()
-      for file in $filels; do
-          file_array+=($file)
-      done
-      if [ "$file_array" == "" ]; then
+      readarray -t filels < <(find /home -type f \( -name "*.wav" -o -name "*.mp3" -o -name "*.png" -o -name "*.mp4" -o -name "*.mkv" -o -name "*.webm" -o -name "*.webp" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.avi" -o -name "*.flv" -o -name "*.mov" -o -name "*.wmv" -o -name "*.m4v" \))
+      if [ ${#filels[@]} -eq 0 ]; then
         dialog --title "Misc - Unauthorized Files" --msgbox "No unauthorized files found" 0 0
       else
-        # Add "off" after each file location
-        final_file_array=()
-        for file in "${file_array[@]}"; do
-            final_file_array+=("$file" "" off)
+        # Convert the file list into an array
+        file_array=()
+        for file in "${filels[@]}"; do
+          file_array+=("$file" "" off)
         done
 
-        # Use dialog to prompt the user for a list of files TO DELETE!!!
-        filelocations=$(dialog --title "Misc - Delete Files" --checklist "Found these potentially unauthorized files - Select which files should be deleted:" 0 0 0 "${final_file_array[@]}" --output-fd 1)
+        # Use dialog to prompt the user for a list of files to delete
+        filelocations=$(dialog --separate-output --title "Misc - Delete Files" --checklist "Found these potentially unauthorized files - Select which files should be deleted:" 0 0 0 "${file_array[@]}" --output-fd 1)
+        OLDIFS=$IFS
+        IFS=$'\n'
         file_list=""
         for file in $filelocations; do
           rm -f "$file" >/dev/null
           file_list="$file_list$file\n"
         done
+        IFS=$OLDIFS
         dialog --title "User Management - Deleted files" --msgbox "$file_list" 0 0
       fi
     fi

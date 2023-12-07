@@ -8,7 +8,6 @@ Debian/Ubuntu script - A Text-User Interface meant to guide you through some of 
   + Implement ability to read skel files
   + Implement passwdqc PAM
   + Implement ability to check for malicious repos
-  + Fix issues with "unauthorized files" part not displaying directories correctly
   + Enable secure FTP settings
   + Set grub encrypted password
   + Search for symbolic links
