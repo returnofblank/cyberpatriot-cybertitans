@@ -12,7 +12,7 @@ PACKAGE_NAME="dialog"
 dpkg --get-selections | grep -q $PACKAGE_NAME > /dev/null
 if [[ $? -ne 0 ]]; then
   echo "The package $PACKAGE_NAME is not installed."
-  sudo apt -y install $PACKAGE_NAME
+  apt -y install $PACKAGE_NAME
 fi
 
 # Package name to check
@@ -22,7 +22,7 @@ PACKAGE_NAME="xterm"
 dpkg --get-selections | grep -q $PACKAGE_NAME > /dev/null
 if [[ $? -ne 0 ]]; then
   echo "The package $PACKAGE_NAME is not installed."
-  sudo apt -y install $PACKAGE_NAME
+  apt -y install $PACKAGE_NAME
 fi
 
 # Package name to check
@@ -32,7 +32,7 @@ PACKAGE_NAME="curl"
 dpkg --get-selections | grep -q $PACKAGE_NAME > /dev/null
 if [[ $? -ne 0 ]]; then
   echo "The package $PACKAGE_NAME is not installed."
-  sudo apt -y install $PACKAGE_NAME
+  apt -y install $PACKAGE_NAME
 fi
 
 #Enable distro agnostic identification of administrators
@@ -547,7 +547,8 @@ misc_management_menu () {
     2 "List and remove potential unauthorized files in /home" off \
     3 "List contents of /etc/grub.d/40_custom to check for malicious options" off \
     4 "List files with a SUID or GUID permission value set to it and clear them" off \
-    5 "List contents of /etc/hosts file to find potentially harmful DNS redirects" off
+    5 "List contents of /etc/hosts file to find potentially harmful DNS redirects" off \
+    6 "Edit files in /etc/skel to find malicious entries" off
     )
   for option in $infom; do
     if [ "$option" == 1 ]; then
@@ -602,7 +603,7 @@ misc_management_menu () {
       fi
     fi
     if [ "$option" == 3 ]; then
-      dialog --title "Information - List Contents of Grub File" --msgbox "This will launch the nano editor, press CTRL + X to exit, and choose whether to save or not. Beware, what you do here can break the system!" 0 0
+      dialog --title "Misc - List Contents of Grub File" --msgbox "This will launch the nano editor, press CTRL + X to exit, and choose whether to save or not. Beware, what you do here can break the system!" 0 0
       nano /etc/grub.d/40_custom
     fi
     if [ "$option" == 4 ]; then
@@ -632,8 +633,28 @@ misc_management_menu () {
       fi
     fi
     if [ "$option" == 5 ]; then
-      dialog --title "Information - List Contents of /etc/hosts" --msgbox "This will launch visudo using the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
+      dialog --title "Misc - List Contents of /etc/hosts" --msgbox "This will launch visudo using the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
       nano /etc/hosts
+    fi
+    if [ "$option" == 6 ]; then
+      shopt -s extglob
+      shopt -s dotglob
+      files=()
+      i=0
+      for file in /etc/skel/*; do
+        files+=("$file")
+        ((i++))
+      done
+
+      options=()
+      for i in "${!files[@]}"; do
+        options+=($((i + 1)) "${files[i]}")
+      done
+
+      skelfiles=$(dialog --title "Misc - Edit /etc/skel" --menu "Found these files in /etc/skel - Select which file should be edited:" 0 0 0 --output-fd 1 "${options[@]}")
+      dialog --title "Misc - Edit /etc/skel" --msgbox "This will launch visudo using the nano editor, press CTRL + X to exit, and choose whether to save or not." 0 0
+      selected_file_index=$((skelfiles - 1))
+      nano "${files[$selected_file_index]}"
     fi
   done
 }
