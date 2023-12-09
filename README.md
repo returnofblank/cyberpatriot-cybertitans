@@ -7,6 +7,7 @@ Debian/Ubuntu script - A Text-User Interface meant to guide you through some of 
   + Ability to read log files
   + Better way to read cron jobs, or see their history
   + Add kali tools to hacking tools, like fcrackzip
+  + /etc/gpasswd and /etc/group permission checking
 
 
 
