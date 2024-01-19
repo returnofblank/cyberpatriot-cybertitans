@@ -28,6 +28,18 @@ fi
 # Package name to check
 PACKAGE_NAME="curl"
 
+packagecheck() {
+	dpkg --get-selections | grep -q $package > /dev/null
+		if [[ $? -ne 0 ]]; then
+			echo "The package $package is not installed."
+			apt -y install $package
+	fi
+}
+
+for package in "dialog" "curl" "xterm"; do
+	
+done
+
 # Check if the package is installed
 dpkg --get-selections | grep -q $PACKAGE_NAME > /dev/null
 if [[ $? -ne 0 ]]; then
