@@ -8,7 +8,7 @@ fi
 #Ensure dependencies are installed
 packagecheck() {
 	dpkg --get-selections | grep -q $1 > /dev/null
-		if [[ $? -ne 0 ]]; then
+		if [ $? -ne 0 ]; then
 			echo "The package $1 is not installed."
 			apt -y install $1
 	fi
