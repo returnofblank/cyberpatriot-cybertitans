@@ -5,47 +5,18 @@ if [[ "$EUID" -ne 0 ]]; then
 	exit 0
 fi
 
-# Package name to check
-PACKAGE_NAME="dialog"
-
-# Check if the package is installed
-dpkg --get-selections | grep -q $PACKAGE_NAME > /dev/null
-if [[ $? -ne 0 ]]; then
-	echo "The package $PACKAGE_NAME is not installed."
-	apt -y install $PACKAGE_NAME
-fi
-
-# Package name to check
-PACKAGE_NAME="xterm"
-
-# Check if the package is installed
-dpkg --get-selections | grep -q $PACKAGE_NAME > /dev/null
-if [[ $? -ne 0 ]]; then
-	echo "The package $PACKAGE_NAME is not installed."
-	apt -y install $PACKAGE_NAME
-fi
-
-# Package name to check
-PACKAGE_NAME="curl"
-
+#Ensure dependencies are installed
 packagecheck() {
-	dpkg --get-selections | grep -q $package > /dev/null
+	dpkg --get-selections | grep -q $1 > /dev/null
 		if [[ $? -ne 0 ]]; then
-			echo "The package $package is not installed."
-			apt -y install $package
+			echo "The package $1 is not installed."
+			apt -y install $1
 	fi
 }
 
 for package in "dialog" "curl" "xterm"; do
-	
+	packagecheck "$package"
 done
-
-# Check if the package is installed
-dpkg --get-selections | grep -q $PACKAGE_NAME > /dev/null
-if [[ $? -ne 0 ]]; then
-	echo "The package $PACKAGE_NAME is not installed."
-	apt -y install $PACKAGE_NAME
-fi
 
 #Enable distro agnostic identification of administrators
 if [[ -f /etc/os-release ]]; then
