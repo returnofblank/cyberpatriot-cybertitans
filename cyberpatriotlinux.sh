@@ -746,7 +746,7 @@ while true; do
 		8 "Finished (Close Prompt)"
 	)
 	if [ $? -ne 0 ]; then
-				clear && break
+		clear && break
 	fi
 	case $mainmenu in
 		1) user_management_menu ;;
