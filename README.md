@@ -1,5 +1,5 @@
 # HERE BE DRAGONS
-The Ubuntu script was made at the hands of a high school student(s) learning shell scripting -- it may not follow good design choices, and it may contain bugs (most definitely).
+The following scripts were made at the hands of a high school students learning shell scripting -- it may not follow good design choices, and it may contain bugs (most definitely).
 
 That's to say, this software is provided as-is without warranty. So if you brick your VM using this script, sorry!
 
