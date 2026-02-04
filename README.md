@@ -3,6 +3,12 @@ The following scripts were made at the hands of a high school students learning 
 
 That's to say, this software is provided as-is without warranty. So if you brick your VM using this script, sorry!
 
+# LINUX USAGE
+1. Download this script to the virtual machine
+2. `cd` into the directory in which the script is downloaded
+3. Run `./cyberpatriotlinux.sh`
+4. Follow the steps to a tee (I haven't tested edge cases, so if you deviate from the instructions, it could break the virtual machine!)
+
 # Cyber Patriot - Cyber Titan scripts
 ## Various scripts made for CyberPatriot meant to automate many of the vulnerabilities
 
